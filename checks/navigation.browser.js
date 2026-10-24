@@ -1,9 +1,9 @@
 // Browser regression: every lesson stage is accessible without watching the animation.
-async (page) => {
+export default async (page) => {
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
   const results = [];
   for (const n of [2, 3]) {
-    await page.goto('http://127.0.0.1:8766');
+    await page.goto('/');
     await page.locator('[data-lesson="' + n + '"]').click();
     await page.locator('[data-stage="practice"]').click();
     assert(await page.locator('#practicePanel').isVisible(), n + '×' + n + ': practice tab is blocked');
@@ -23,12 +23,12 @@ async (page) => {
     await page.locator('#collectionButton').click();
     await page.locator('[data-open-card="' + n + '"]').click();
     assert(await page.locator('#cardPanel').isVisible(), 'Collection entry must reopen its lesson card');
-    await page.goto('http://127.0.0.1:8766');
+    await page.goto('/');
     await page.locator('[data-lesson="' + n + '"]').click();
     assert(await page.locator('#collectCard').isEnabled(), 'Collect button must work from the first frame');
     await page.locator('#collectCard').click();
     assert(await page.locator('#cardPanel').isVisible(), 'First-frame collection must open the card');
-    await page.goto('http://127.0.0.1:8766');
+    await page.goto('/');
     await page.locator('[data-lesson="' + n + '"]').click();
     await page.locator('[data-stage="practice"]').click();
     await page.locator('#answerInput').fill('999');

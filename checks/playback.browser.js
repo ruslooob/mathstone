@@ -1,7 +1,7 @@
-// Browser regression check. Run this function with a Playwright page on the local app.
-async (page) => {
+// Existing browser regression, executed by the Playwright runner.
+export default async (page) => {
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
-  await page.goto('http://127.0.0.1:8766');
+  await page.goto('/');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.clock.install();
   const results = [];

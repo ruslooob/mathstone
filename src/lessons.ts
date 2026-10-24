@@ -1,0 +1,82 @@
+export type LessonId = 2 | 3;
+export type Matrix = readonly (readonly number[])[];
+export type Sign = 'positive' | 'negative';
+export interface DiagramPath { indexes: readonly number[]; sign: Sign }
+interface Lesson {
+  title: readonly [string, string];
+  name: string;
+  description: readonly [string, string];
+  example: Matrix;
+  positive: readonly (readonly number[])[];
+  negative: readonly (readonly number[])[];
+  tasks: readonly Matrix[];
+}
+export interface Frame {
+  kicker: string;
+  title: string;
+  text: string;
+  paths: DiagramPath[];
+  expression: string;
+  result?: number;
+  negative?: boolean;
+}
+
+export const lessonIds: readonly LessonId[] = [2, 3];
+export const lessons: Record<LessonId, Lesson> = {
+  2: {
+    title: ['Две диагонали.', 'Один ответ.'], name: 'Две диагонали',
+    description: ['Посмотри, как устроен приём.', 'Потом повторишь его сам.'],
+    example: [[3, 2], [1, 4]], positive: [[0, 3]], negative: [[1, 2]],
+    tasks: [[[2, 3], [1, 4]], [[4, 2], [3, 1]], [[2, -1], [3, 4]]],
+  },
+  3: {
+    title: ['Три тройки в плюс.', 'Три — в минус.'], name: 'Правило треугольников',
+    description: ['Шесть произведений.', 'Одна наглядная схема.'],
+    example: [[2, 1, 3], [1, 0, 2], [3, 2, 1]],
+    positive: [[0, 4, 8], [1, 5, 6], [2, 3, 7]],
+    negative: [[2, 4, 6], [0, 5, 7], [1, 3, 8]],
+    tasks: [[[1, 2, 0], [0, 3, 1], [2, 0, 1]], [[2, 0, 1], [1, 3, 0], [0, 2, 1]], [[1, 2, 3], [2, 4, 6], [0, 1, 1]]],
+  },
+};
+
+export function determinant(m: Matrix): number {
+  if (m.length === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+  return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+    - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+    + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+}
+
+export const numberText = (value: number): string => String(value).replace(/-/g, '−');
+const factorText = (value: number): string => value < 0 ? `(${numberText(value)})` : numberText(value);
+const productOf = (flat: readonly number[], indexes: readonly number[]): number => indexes.reduce((value, i) => value * flat[i], 1);
+
+export function framesFor(n: LessonId): Frame[] {
+  const lesson = lessons[n], flat = lesson.example.flat();
+  const frames: Frame[] = [{
+    kicker: 'НАЧНЁМ С ЗАДАЧИ', title: 'Ищем одно число',
+    text: `Определитель — число, которое вычисляют по элементам квадратной матрицы. Сейчас покажем способ для ${n} × ${n}.`,
+    paths: [], expression: 'det A = ?',
+  }];
+  lesson.positive.forEach((indexes, i) => frames.push({
+    kicker: n === 2 ? 'ШАГ 01 · ПЛЮС' : `ПЛЮС · ТРОЙКА ${i + 1} ИЗ 3`,
+    title: n === 2 ? 'Главная диагональ' : i === 0 ? 'Первая тройка — диагональ' : 'Следующая тройка — треугольник',
+    text: n === 2 ? 'Перемножь два числа на диагонали сверху слева вниз направо.' : i === 0 ? 'Перемножь три выделенных числа. Это первое слагаемое со знаком «+».' : 'Перемножь числа в трёх вершинах выделенного треугольника. Прибавь это произведение.',
+    paths: [{ indexes, sign: 'positive' }],
+    expression: `${indexes.map(j => factorText(flat[j])).join(' × ')} = ${numberText(productOf(flat, indexes))}`,
+  }));
+  lesson.negative.forEach((indexes, i) => frames.push({
+    kicker: n === 2 ? 'ШАГ 02 · МИНУС' : `МИНУС · ТРОЙКА ${i + 1} ИЗ 3`,
+    title: n === 2 ? 'Вторая диагональ' : i === 0 ? 'Теперь другая диагональ' : 'Ещё один треугольник',
+    text: n === 2 ? 'Перемножь числа на второй диагонали. Это произведение нужно вычесть.' : i === 0 ? 'Перемножь три выделенных числа. Это произведение и два следующих нужно вычесть.' : 'Перемножь числа в вершинах оранжевого треугольника. Это произведение тоже вычитается.',
+    paths: [{ indexes, sign: 'negative' }], negative: true,
+    expression: `${indexes.map(j => factorText(flat[j])).join(' × ')} = ${numberText(productOf(flat, indexes))}`,
+  }));
+  frames.push({
+    kicker: 'СОБИРАЕМ ОТВЕТ', title: n === 2 ? 'Первое минус второе' : 'Складываем и вычитаем',
+    text: n === 2 ? 'Из произведения на зелёной диагонали вычти произведение на оранжевой. Получился определитель.' : 'Сложи три зелёных произведения и вычти три оранжевых. Так работает правило треугольников для матрицы 3 × 3.',
+    paths: [],
+    expression: `${lesson.positive.map(p => factorText(productOf(flat, p))).join(' + ')} − ${lesson.negative.map(p => factorText(productOf(flat, p))).join(' − ')} = `,
+    result: determinant(lesson.example),
+  });
+  return frames;
+}

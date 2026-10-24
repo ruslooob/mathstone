@@ -4,3 +4,8 @@ __pycache__/
 node_modules/
 *.tar.gz
 *.tgz
+dist/
+test-results/
+playwright-report/
+.idea/
+.playwright-mcp/
