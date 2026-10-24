@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f0">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <title>Вижу → решаю — определители матриц</title>
+  <meta name="description" content="Два коротких урока: посмотри, как вычислить определитель матрицы, забери визуальную шпаргалку и реши самостоятельно.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Вижу — решаю, на главную"><span class="brand-mark" aria-hidden="true">↗</span> вижу<span class="brand-arrow">→</span>решаю</a>
+    <span class="top-label">МАЛЕНЬКИЕ УРОКИ. НОВЫЕ УМЕНИЯ.</span>
+    <button class="collection-trigger" id="collectionButton"><span aria-hidden="true">▱</span> Мои карточки <span id="cardCount">0 / 2</span></button>
+  </header>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="eyebrow">МАТЕМАТИКА / ГЛАВА 01</div>
+      <h1>Определители<br>матриц<span class="title-dot">.</span></h1>
+      <p class="sidebar-description">Увидеть приём.<br>Сохранить схему.<br>Попробовать самому.</p>
+      <nav class="lesson-list" aria-label="Уроки">
+        <button class="lesson-button active" data-lesson="2"><span class="lesson-symbol">2<span>×</span>2</span><span class="lesson-copy"><strong>Две диагонали</strong><small>Определитель 2 × 2</small></span><span class="lesson-status" id="status2">01</span></button>
+        <button class="lesson-button" data-lesson="3"><span class="lesson-symbol">3<span>×</span>3</span><span class="lesson-copy"><strong>Правило треугольников</strong><small>Определитель 3 × 3</small></span><span class="lesson-status" id="status3">02</span></button>
+      </nav>
+      <div class="journey"><div class="journey-top"><span>ТВОЙ ПУТЬ</span><span id="totalProgress">0 / 6 задач</span></div><div class="progress-track"><div id="overallProgress"></div></div><p>Шпаргалка всегда под рукой.<br>Подсматривай столько, сколько нужно.</p></div>
+      <div class="sidebar-bottom"><span class="little-star">✳</span><span>Один понятный шаг<br>за другим.</span></div>
+    </aside>
+    <main id="mainContent">
+      <div class="content-top"><div class="breadcrumb">МАТЕМАТИКА <span>/</span> <span id="lessonCrumb">МАТРИЦЫ 2 × 2</span></div><span class="prototype-badge">ПЕРВАЯ ВЕРСИЯ</span></div>
+      <div class="lesson-heading"><div><div class="eyebrow" id="lessonIndex">УРОК 01 · ОПРЕДЕЛИТЕЛЬ 2 × 2</div><h2 id="lessonTitle">Две диагонали.<br>Один ответ.</h2></div><p id="lessonDescription">Посмотри, как устроен приём.<br>Потом повторишь его сам.</p></div>
+      <nav class="stage-tabs" aria-label="Этапы урока"><button data-stage="watch" class="active"><span>01</span> Смотрю</button><button data-stage="card"><span>02</span> Забираю карточку <span class="tab-lock" id="cardLock">·</span></button><button data-stage="practice"><span>03</span> Решаю <span class="tab-lock" id="practiceLock">·</span></button></nav>
+      <section id="watchPanel" class="stage-panel" aria-label="Объяснение способа">
+        <div class="animation-card">
+          <div class="canvas-head"><span class="pill"><span class="live-dot"></span> ВИЗУАЛЬНЫЙ РАЗБОР</span><span id="frameCounter">01 / 04</span></div>
+          <div class="visual-stage"><div id="mainDiagram" class="main-diagram"></div><div class="step-explanation"><div class="step-kicker" id="stepKicker"></div><h3 id="stepTitle"></h3><p id="stepText"></p><div id="stepExpression" class="step-expression"></div></div></div>
+          <div class="animation-footer"><button id="playButton" class="play-button" aria-label="Запустить анимацию">▶</button><div class="timeline" id="timeline" aria-label="Шаги объяснения"></div><span class="animation-hint">В твоём темпе</span><button id="previousStep" class="icon-button" aria-label="Предыдущий шаг">←</button><button id="nextStep" class="icon-button next-button" aria-label="Следующий шаг">→</button></div>
+        </div>
+        <div class="below-canvas"><p><span aria-hidden="true">↳</span> Можно поставить на паузу и вернуться к любому шагу.</p><button id="collectCard" class="primary-button" disabled>Забрать карточку <span>↗</span></button></div>
+      </section>
+      <section id="cardPanel" class="stage-panel" aria-label="Шпаргалка" hidden></section>
+      <section id="practicePanel" class="stage-panel" aria-label="Самостоятельные задачи" hidden></section>
+      <footer class="content-footer"><span>ПОНЯТЬ → ПОПРОБОВАТЬ → УМЕТЬ</span><span>Можно решать на бумаге или в любом редакторе.</span></footer>
+    </main>
+  </div>
+  <dialog id="collectionDialog"><div class="dialog-top"><div><div class="eyebrow">ТВОИ ПРИЁМЫ</div><h2>Коллекция карточек</h2></div><button class="icon-button" id="closeCollection" aria-label="Закрыть коллекцию">×</button></div><div id="collectionContent"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
