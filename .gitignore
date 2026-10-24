@@ -1,4 +1,6 @@
 .sites-local/
+.openai/
+__pycache__/
 node_modules/
 *.tar.gz
 *.tgz

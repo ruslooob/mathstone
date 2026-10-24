@@ -9,7 +9,10 @@ const lessons = {
 };
 const freshProgress = () => ({viewed:[],card:false,solved:0,hints:[],completed:false});
 const state = {lesson:2,stage:'watch',step:0,playing:false,hintOpen:false,answered:false,feedback:'',feedbackKind:'',progress:{2:freshProgress(),3:freshProgress()}};
+const FRAME_DURATION = 5000;
 let playTimer = null;
+let remainingFrameTime = FRAME_DURATION;
+let frameStartedAt = null;
 let toastTimer = null;
 
 function determinant(m) {
@@ -50,16 +53,40 @@ function diagram(m,paths=[],schematic=false,label=true) {
   return svg+'</svg>';
 }
 
-function stopPlayback() {clearTimeout(playTimer);playTimer=null;state.playing=false;const button=$('#playButton');button.textContent='▶';button.setAttribute('aria-label','Запустить анимацию');}
+function updatePlaybackControls() {
+  const button=$('#playButton'),start=$('#startAnimation');
+  button.textContent=state.playing?'Ⅱ':'▶';
+  button.setAttribute('aria-label',state.playing?'Поставить на паузу':'Запустить анимацию');
+  button.setAttribute('aria-pressed',String(state.playing));
+  start.textContent=state.playing?'Ⅱ Пауза':state.step===0?'▶ Смотреть':state.step===framesFor(state.lesson).length-1?'↻ Ещё раз':'▶ Продолжить';
+  start.setAttribute('aria-pressed',String(state.playing));
+}
+function stopPlayback() {
+  if(state.playing&&frameStartedAt!==null)remainingFrameTime=Math.max(0,remainingFrameTime-(performance.now()-frameStartedAt));
+  clearTimeout(playTimer);playTimer=null;frameStartedAt=null;state.playing=false;
+  $('#mainDiagram').getAnimations({subtree:true}).forEach(animation=>animation.pause());
+  updatePlaybackControls();
+}
 function scheduleFrame() {
   clearTimeout(playTimer);
+  frameStartedAt=performance.now();
   playTimer=setTimeout(()=>{
+    playTimer=null;frameStartedAt=null;
     if(!state.playing)return;
-    if(state.step>=framesFor(state.lesson).length-1){stopPlayback();return;}
-    state.step++;renderFrame();scheduleFrame();
-  },6500);
+    state.step++;renderFrame();
+    if(state.step===framesFor(state.lesson).length-1){stopPlayback();return;}
+    scheduleFrame();
+  },remainingFrameTime);
+}
+function togglePlayback() {
+  if(state.playing){stopPlayback();return;}
+  if(state.step===0||state.step===framesFor(state.lesson).length-1){state.step=1;renderFrame();}
+  state.playing=true;
+  $('#mainDiagram').getAnimations({subtree:true}).filter(animation=>animation.playState==='paused').forEach(animation=>animation.play());
+  updatePlaybackControls();scheduleFrame();
 }
 function renderFrame() {
+  remainingFrameTime=FRAME_DURATION;frameStartedAt=null;
   const frames=framesFor(state.lesson),frame=frames[state.step],p=state.progress[state.lesson];
   if(!p.viewed.includes(state.step))p.viewed.push(state.step);
   $('#mainDiagram').innerHTML=diagram(lessons[state.lesson].example,frame.paths);
@@ -68,8 +95,8 @@ function renderFrame() {
   $('#frameCounter').textContent=String(state.step+1).padStart(2,'0')+' / '+String(frames.length).padStart(2,'0');
   $('#timeline').innerHTML=frames.map((_,i)=>'<button class="'+(i===state.step?'current':p.viewed.includes(i)?'passed':'')+'" data-frame="'+i+'" aria-label="Шаг '+(i+1)+'" '+(i===state.step?'aria-current="step"':'')+'></button>').join('');
   $('#previousStep').disabled=state.step===0;$('#nextStep').disabled=state.step===frames.length-1;
-  $('#collectCard').disabled=state.step!==frames.length-1&&!p.card;
   $('#collectCard').innerHTML=(p.card?'Открыть карточку':'Забрать карточку')+' <span>↗</span>';
+  updatePlaybackControls();
 }
 function updateChrome() {
   const p=state.progress[state.lesson],total=state.progress[2].solved+state.progress[3].solved;
@@ -80,7 +107,8 @@ function updateChrome() {
     const button=$('[data-lesson="'+n+'"]');button.classList.toggle('active',state.lesson===n);button.setAttribute('aria-current',state.lesson===n?'page':'false');
   }
   for(const button of document.querySelectorAll('[data-stage]')){button.classList.toggle('active',button.dataset.stage===state.stage);button.setAttribute('aria-current',button.dataset.stage===state.stage?'step':'false');}
-  $('#cardLock').textContent=p.card?'✓':'·';$('#practiceLock').textContent=p.completed?'✓':'·';
+  $('#cardLock').textContent=p.card?'✓':'';$('#practiceLock').textContent=p.completed?'✓':'';
+  $('#collectCard').innerHTML=(p.card?'Открыть карточку':'Забрать карточку')+' <span>↗</span>';
   for(const stage of ['watch','card','practice'])$('#'+stage+'Panel').hidden=state.stage!==stage;
 }
 function switchLesson(n) {
@@ -90,7 +118,7 @@ function switchLesson(n) {
 }
 function switchStage(stage) {
   const p=state.progress[state.lesson];
-  if(stage!=='watch'&&!p.card){toast('Сначала посмотри разбор и забери карточку со схемой.');return;}
+  if(stage==='card'&&!p.card){p.card=true;toast('Карточка добавлена в твою коллекцию.');}
   stopPlayback();state.stage=stage;updateChrome();
   if(stage==='card')renderCard();if(stage==='practice')renderPractice();
 }
@@ -132,7 +160,7 @@ function checkAnswer() {
 }
 function nextTask() {
   const p=state.progress[state.lesson];if(!state.answered)return;
-  p.solved++;if(p.solved===3)p.completed=true;
+  p.solved++;if(p.solved===3){p.completed=true;p.card=true;}
   state.answered=false;state.feedback='';state.feedbackKind='';state.hintOpen=false;updateChrome();renderPractice();
 }
 function renderComplete() {
@@ -150,15 +178,12 @@ function showCollection(){
 }
 document.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>switchLesson(Number(b.dataset.lesson)));
 document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>switchStage(b.dataset.stage));
-$('#playButton').onclick=()=>{
-  if(state.playing){stopPlayback();return;}
-  if(state.step===framesFor(state.lesson).length-1){state.step=0;renderFrame();}
-  state.playing=true;$('#playButton').textContent='Ⅱ';$('#playButton').setAttribute('aria-label','Поставить на паузу');scheduleFrame();
-};
+$('#playButton').onclick=togglePlayback;
+$('#startAnimation').onclick=togglePlayback;
 $('#previousStep').onclick=()=>{stopPlayback();state.step=Math.max(0,state.step-1);renderFrame();};
 $('#nextStep').onclick=()=>{stopPlayback();state.step=Math.min(framesFor(state.lesson).length-1,state.step+1);renderFrame();};
 $('#timeline').onclick=event=>{const b=event.target.closest('[data-frame]');if(!b)return;stopPlayback();state.step=Number(b.dataset.frame);renderFrame();};
-$('#collectCard').onclick=()=>{const p=state.progress[state.lesson];if(!p.card){p.card=true;toast('Карточка добавлена в твою коллекцию.');}switchStage('card');};
+$('#collectCard').onclick=()=>switchStage('card');
 $('#collectionButton').onclick=showCollection;$('#closeCollection').onclick=()=>$('#collectionDialog').close();
 $('#collectionDialog').onclick=event=>{const b=event.target.closest('[data-open-card]');if(b){$('#collectionDialog').close();switchLesson(Number(b.dataset.openCard));switchStage('card');}};
 $('.brand').onclick=event=>{event.preventDefault();switchLesson(2);};
