@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import ui from './ui.module.css';
 import CheatCard from './CheatCard';
 import Diagram from './Diagram';
 import { determinant, numberText } from './lessons';
@@ -67,17 +68,17 @@ export default function Practice({
 
   return (
     <>
-      <div className="practice-top">
-        <span className="eyebrow">
+      <div className={styles.practiceTop}>
+        <span className={`${ui.eyebrow} ${styles.practiceCount}`}>
           {`Решено задач: ${progress.solved}`}
         </span>
       </div>
-      <div className="practice-card">
-        <div className="task-header">
+      <div className={styles.practiceCard}>
+        <div className={styles.taskHeader}>
           <h3>Найди определитель</h3>
           <button
             type="button"
-            className="secondary-button"
+            className={`${ui.secondaryButton} ${styles.hintButton}`}
             id="hintButton"
             aria-expanded={hintOpen}
             onClick={() => {
@@ -89,11 +90,11 @@ export default function Practice({
             {hintOpen ? 'Скрыть шпаргалку' : 'Показать шпаргалку'}
           </button>
         </div>
-        <div className="task-body">
-          <div className="task-matrix">
+        <div className={styles.taskBody}>
+          <div className={styles.taskMatrix}>
             <Diagram matrix={progress.task.matrix} />
           </div>
-          <div className="answer-area">
+          <div className={styles.answerArea}>
             <form
               id="answerForm"
               onSubmit={(event) => {
@@ -103,8 +104,8 @@ export default function Practice({
               }}
             >
               <label htmlFor="answerInput">Твой ответ</label>
-              <div className="answer-row">
-                <span className="det-label">det A =</span>
+              <div className={styles.answerRow}>
+                <span className={styles.detLabel}>det A =</span>
                 <input
                   ref={inputRef}
                   id="answerInput"
@@ -121,7 +122,7 @@ export default function Practice({
               </div>
               <button
                 ref={actionRef}
-                className={`primary-button ${styles.actionButton}`}
+                className={`${ui.primaryButton} ${styles.actionButton}`}
                 type="submit"
                 id={answered ? 'nextTask' : undefined}
               >
@@ -131,7 +132,7 @@ export default function Practice({
               <div className={styles.answerFeedback}>
                 <div
                   id="taskFeedback"
-                  className={`feedback${!answered && feedback ? ' wrong' : ''}`}
+                  className={`${styles.feedback}${!answered && feedback ? ` ${styles.wrong}` : ''}`}
                   role="status"
                   hidden={!answered && !feedback}
                 >
@@ -142,10 +143,10 @@ export default function Practice({
           </div>
         </div>
       </div>
-      <div id="practiceHint" className="practice-hint" hidden={!hintOpen}>
-        <CheatCard lessonId={lessonId} />
-        <div style={{ marginTop: 12, textAlign: 'right' }}>
-          <button type="button" className="secondary-button" id="reviewExplanation" onClick={onReview}>
+      <div id="practiceHint" className={styles.practiceHint} hidden={!hintOpen}>
+        <CheatCard lessonId={lessonId} compact />
+        <div className={styles.reviewActions}>
+          <button type="button" className={ui.secondaryButton} id="reviewExplanation" onClick={onReview}>
             Посмотреть разбор ещё раз ↗
           </button>
         </div>

@@ -1,0 +1,118 @@
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  font-size: 17px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.dialog {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--bg);
+  width: min(620px, calc(100vw - 30px));
+  max-height: 90vh;
+  padding: 28px;
+  color: var(--ink);
+}
+
+.dialog::backdrop {
+  background: #1a2c2266;
+  backdrop-filter: blur(4px);
+}
+
+.dialogTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.dialogTop h2 {
+  font-size: 25px;
+  letter-spacing: -1px;
+  font-weight: 500;
+  margin: 8px 0 0;
+}
+
+.emptyCollection {
+  padding: 35px 20px;
+  text-align: center;
+  background: var(--paper);
+  border: 1px dashed #ccd4c3;
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.collectionEntry {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  padding: 18px;
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.collectionEntry .entrySymbol {
+  font-size: 30px;
+}
+
+.collectionEntry > div {
+  flex: 1;
+}
+
+.collectionEntry h3 {
+  margin: 0 0 6px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.collectionEntry p {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.collectionEntry button {
+  font-size: 10px;
+}
+@media (max-width: 580px) {
+  .collectionEntry {
+    padding: 15px 12px;
+    gap: 10px;
+  }
+
+  .collectionEntry h3 {
+    font-size: 12px;
+  }
+
+  .collectionEntry p {
+    font-size: 9px;
+  }
+
+  .collectionEntry .entrySymbol {
+    font-size: 23px;
+  }
+
+  .collectionEntry button {
+    font-size: 9px;
+    padding: 9px;
+  }
+
+  .dialogTop h2 {
+    font-size: 23px;
+  }
+
+  .dialog {
+    padding: 23px 18px;
+  }
+}

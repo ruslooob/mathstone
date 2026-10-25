@@ -1,0 +1,66 @@
+.eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  line-height: 1.7;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.lessonSymbol {
+  font-size: 19px;
+  letter-spacing: -1px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--green);
+}
+
+.lessonSymbol > span {
+  font-size: 12px;
+  color: #91a489;
+}
+
+.primaryButton {
+  padding: 14px 18px;
+  background: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  white-space: nowrap;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #1d4936;
+}
+
+.primaryButton > span {
+  font-size: 16px;
+}
+
+.secondaryButton {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.secondaryButton:hover {
+  border-color: #9daa91;
+}
+@media (max-width: 580px) {
+  .lessonSymbol {
+    font-size: 17px;
+  }
+}

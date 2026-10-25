@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import ui from './ui.module.css';
+import styles from './Collection.module.css';
 import { lessonIds, lessons } from './lessons';
 import type { LessonId } from './lessons';
 import type { LessonProgress } from './progress';
@@ -20,15 +22,15 @@ export default function Collection({
   }, [open]);
   const earned = lessonIds.filter((lessonId) => progress[lessonId].card);
   return (
-    <dialog ref={ref} id="collectionDialog" onClose={onClose}>
-      <div className="dialog-top">
+    <dialog className={styles.dialog} ref={ref} id="collectionDialog" onClose={onClose}>
+      <div className={styles.dialogTop}>
         <div>
-          <div className="eyebrow">ТВОИ ПРИЁМЫ</div>
+          <div className={ui.eyebrow}>ТВОИ ПРИЁМЫ</div>
           <h2>Коллекция шпаргалок</h2>
         </div>
         <button
           type="button"
-          className="icon-button"
+          className={styles.iconButton}
           id="closeCollection"
           aria-label="Закрыть коллекцию"
           onClick={onClose}
@@ -39,8 +41,8 @@ export default function Collection({
       <div id="collectionContent">
         {earned.length ? (
           earned.map((lessonId) => (
-            <article className="collection-entry" key={lessonId}>
-              <span className="lesson-symbol">
+            <article className={styles.collectionEntry} key={lessonId}>
+              <span className={`${ui.lessonSymbol} ${styles.entrySymbol}`}>
                 {lessonId}
                 <span>×</span>
                 {lessonId}
@@ -53,7 +55,7 @@ export default function Collection({
               </div>
               <button
                 type="button"
-                className="secondary-button"
+                className={ui.secondaryButton}
                 data-open-card={lessonId}
                 onClick={() => {
                   onClose();
@@ -65,7 +67,7 @@ export default function Collection({
             </article>
           ))
         ) : (
-          <div className="empty-collection">
+          <div className={styles.emptyCollection}>
             Здесь появятся твои шпаргалки.
             <br />
             Посмотри первый разбор и забери шпаргалку.

@@ -1,0 +1,123 @@
+.cheatCard {
+  background: var(--paper);
+  border: 1px solid #d5ddcb;
+  border-radius: 16px;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cheatCard:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: #a5b48e;
+}
+
+.cheatTop {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.cheatCard h3 {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.7px;
+  margin: 12px 0 16px;
+}
+
+.schemePair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  max-width: 520px;
+  margin: auto;
+}
+
+.schemeBlock {
+  text-align: center;
+}
+
+.schemeBlock svg {
+  width: 100%;
+  max-width: 210px;
+  display: block;
+  margin: auto;
+}
+
+.schemeSign {
+  font-size: 27px;
+  color: var(--green);
+  font-weight: 500;
+}
+
+.schemeSign.negative {
+  color: var(--orange);
+}
+
+.schemeCaption {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.cheatRule {
+  font-size: 12px;
+  line-height: 1.8;
+  text-align: center;
+  margin: 20px auto 0;
+  color: #67715f;
+  max-width: 470px;
+}
+
+.cheatRule strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.cheatCard.compact {
+  background: #fbfcf6;
+}
+
+.cheatCard.compact h3 {
+  font-size: 20px;
+}
+
+.compact .schemePair {
+  max-width: 390px;
+}
+
+.compact .schemeBlock svg {
+  max-width: 165px;
+}
+@media (max-width: 580px) {
+  .cheatCard {
+    padding: 19px 18px;
+  }
+
+  .cheatCard h3 {
+    font-size: 22px;
+  }
+
+  .schemePair {
+    gap: 6px;
+  }
+
+  .cheatTop {
+    font-size: 8px;
+  }
+
+  .cheatRule {
+    font-size: 11px;
+  }
+
+  .schemeCaption {
+    font-size: 9px;
+  }
+}

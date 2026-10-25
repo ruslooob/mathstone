@@ -1,16 +1,22 @@
+import styles from './CheatCard.module.css';
 import Diagram from './Diagram';
 import { lessons } from './lessons';
 import type { LessonId, Sign } from './lessons';
 
-export default function CheatCard({ lessonId }: { lessonId: LessonId }) {
+interface Props {
+  lessonId: LessonId;
+  compact?: boolean;
+}
+
+export default function CheatCard({ lessonId, compact = false }: Props) {
   const lesson = lessons[lessonId];
   const empty = Array.from({ length: lessonId }, () => Array<number>(lessonId).fill(0));
   const captions = lessonId === 2
     ? { positive: 'Первое произведение', negative: 'Второе произведение вычитаем' }
     : { positive: 'Три произведения складываем', negative: 'Три произведения вычитаем' };
   return (
-    <article className="cheat-card">
-      <div className="cheat-top">
+    <article className={`${styles.cheatCard}${compact ? ` ${styles.compact}` : ''}`}>
+      <div className={styles.cheatTop}>
         <span>
           ШПАРГАЛКА 0
           {lessonId === 2 ? 1 : 2}
@@ -22,10 +28,10 @@ export default function CheatCard({ lessonId }: { lessonId: LessonId }) {
         </span>
       </div>
       <h3>{lesson.name}</h3>
-      <div className="scheme-pair">
+      <div className={styles.schemePair}>
         {(['positive', 'negative'] as const).map((sign: Sign) => (
-          <div className="scheme-block" key={sign}>
-            <div className={`scheme-sign${sign === 'negative' ? ' negative' : ''}`}>
+          <div className={styles.schemeBlock} key={sign}>
+            <div className={`${styles.schemeSign}${sign === 'negative' ? ` ${styles.negative}` : ''}`}>
               {sign === 'positive' ? '+' : '−'}
             </div>
             <Diagram
@@ -34,13 +40,13 @@ export default function CheatCard({ lessonId }: { lessonId: LessonId }) {
               schematic
               label={false}
             />
-            <p className="scheme-caption">
+            <p className={styles.schemeCaption}>
               {captions[sign]}
             </p>
           </div>
         ))}
       </div>
-      <p className="cheat-rule">
+      <p className={styles.cheatRule}>
         {lessonId === 2 ? (
           <>
             Перемножь числа вдоль каждой диагонали.
