@@ -765,10 +765,17 @@ main {
 
 .answer-area form .primary-button {
   margin-top: 14px;
+  min-height: 44px;
   width: 100%;
   max-width: 210px;
   justify-content: center;
   padding: 12px;
+}
+
+.answer-feedback {
+  display: flow-root;
+  min-height: 110px;
+  max-width: 210px;
 }
 
 .feedback {
@@ -788,10 +795,6 @@ main {
 
 .feedback p {
   margin: 0;
-}
-
-.feedback button {
-  margin-top: 12px;
 }
 
 .practice-hint {
@@ -1395,6 +1398,10 @@ dialog::backdrop {
 
   .answer-area form .primary-button {
     width: 100%;
+    max-width: none;
+  }
+
+  .answer-feedback {
     max-width: none;
   }
 

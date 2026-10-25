@@ -23,12 +23,13 @@ export default function Practice({
   const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const nextRef = useRef<HTMLButtonElement>(null);
+  const actionRef = useRef<HTMLButtonElement>(null);
   const answered = progress.task.solved;
   const answer = determinant(progress.task.matrix);
 
   useLayoutEffect(() => {
-    if (answered) nextRef.current?.focus({ preventScroll: true });
+    if (answered) actionRef.current?.focus({ preventScroll: true });
+    else inputRef.current?.focus({ preventScroll: true });
   }, [answered]);
 
   function resetAnswer() {
@@ -96,7 +97,8 @@ export default function Practice({
               id="answerForm"
               onSubmit={(event) => {
                 event.preventDefault();
-                checkAnswer();
+                if (answered) nextTask();
+                else checkAnswer();
               }}
             >
               <label htmlFor="answerInput">Твой ответ</label>
@@ -116,28 +118,27 @@ export default function Practice({
                   aria-invalid={(!answered && Boolean(feedback)) || undefined}
                 />
               </div>
-              <button className="primary-button" type="submit" disabled={answered}>
-                Проверить
-                {' '}
-                <span>→</span>
+              <button
+                ref={actionRef}
+                className="primary-button"
+                type="submit"
+                id={answered ? 'nextTask' : undefined}
+              >
+                {answered ? 'Следующая задача' : 'Проверить'}
+                {answered && <span aria-hidden="true">→</span>}
               </button>
+              <div className="answer-feedback">
+                <div
+                  id="taskFeedback"
+                  className={`feedback${!answered && feedback ? ' wrong' : ''}`}
+                  role="status"
+                  hidden={!answered && !feedback}
+                >
+                  <p id="feedbackText">{answered ? 'Верно' : feedback}</p>
+                </div>
+              </div>
             </form>
           </div>
-        </div>
-        <div
-          id="taskFeedback"
-          className={`feedback${!answered && feedback ? ' wrong' : ''}`}
-          role="status"
-          hidden={!answered && !feedback}
-        >
-          <p id="feedbackText">{answered ? 'Верно' : feedback}</p>
-          {answered && (
-            <button type="button" ref={nextRef} className="primary-button" id="nextTask" onClick={nextTask}>
-              Следующая задача
-              {' '}
-              <span>→</span>
-            </button>
-          )}
         </div>
       </div>
       <div id="practiceHint" className="practice-hint" hidden={!hintOpen}>
