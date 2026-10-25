@@ -1,10 +1,12 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+} from 'react';
 import { framesFor } from './lessons';
 import type { LessonId } from './lessons';
 
 const FRAME_DURATION = 5000;
 
-export function usePlayback(lessonId: LessonId) {
+export default function usePlayback(lessonId: LessonId) {
   const frames = useMemo(() => framesFor(lessonId), [lessonId]);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -14,30 +16,33 @@ export function usePlayback(lessonId: LessonId) {
   const startedAt = useRef<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function clearTimer() {
+  const clearTimer = useCallback(() => {
     if (timer.current !== null) clearTimeout(timer.current);
     timer.current = null;
     if (startedAt.current !== null) {
       remaining.current = Math.max(0, remaining.current - (performance.now() - startedAt.current));
       startedAt.current = null;
     }
-  }
+  }, []);
 
-  function pause() {
+  const pause = useCallback(() => {
     clearTimer();
     setPlaying(false);
-    diagramRef.current?.getAnimations({ subtree: true }).forEach(animation => animation.pause());
-  }
+    diagramRef.current?.getAnimations({ subtree: true }).forEach((animation) => animation.pause());
+  }, [clearTimer]);
 
   function goTo(next: number) {
     pause();
     remaining.current = FRAME_DURATION;
     setStep(Math.max(0, Math.min(frames.length - 1, next)));
-    setRevision(current => current + 1);
+    setRevision((current) => current + 1);
   }
 
   function toggle() {
-    if (playing) { pause(); return; }
+    if (playing) {
+      pause();
+      return;
+    }
     if (step === 0 || step === frames.length - 1) {
       remaining.current = FRAME_DURATION;
       setStep(1);
@@ -46,7 +51,7 @@ export function usePlayback(lessonId: LessonId) {
   }
 
   useEffect(() => {
-    if (!playing) return;
+    if (!playing) return undefined;
     startedAt.current = performance.now();
     timer.current = setTimeout(() => {
       timer.current = null;
@@ -56,18 +61,33 @@ export function usePlayback(lessonId: LessonId) {
       if (step + 1 === frames.length - 1) setPlaying(false);
     }, remaining.current);
     return clearTimer;
-  }, [playing, step, frames.length]);
+  }, [playing, step, frames.length, clearTimer]);
 
   useLayoutEffect(() => {
-    if (playing) diagramRef.current?.getAnimations({ subtree: true })
-      .filter(animation => animation.playState === 'paused').forEach(animation => animation.play());
+    if (playing) {
+      diagramRef.current
+        ?.getAnimations({ subtree: true })
+        .filter((animation) => animation.playState === 'paused')
+        .forEach((animation) => animation.play());
+    }
   }, [playing, step, revision]);
 
   useEffect(() => {
-    const onVisibilityChange = () => { if (document.hidden) pause(); };
+    const onVisibilityChange = () => {
+      if (document.hidden) pause();
+    };
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, []);
+  }, [pause]);
 
-  return { frames, step, playing, revision, diagramRef, pause, goTo, toggle };
+  return {
+    frames,
+    step,
+    playing,
+    revision,
+    diagramRef,
+    pause,
+    goTo,
+    toggle,
+  };
 }

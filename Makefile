@@ -1,11 +1,16 @@
-.PHONY: start install typecheck test build preview
+.PHONY: start install lint typecheck test build preview
 .DEFAULT_GOAL := start
 
-start:
-	node scripts/dev.mjs
+start: install
+	npm run dev
 
-install:
-	node scripts/install.mjs
+install: node_modules/.package-lock.json
+
+node_modules/.package-lock.json: package.json package-lock.json
+	npm ci
+
+lint: install
+	npm run lint
 
 typecheck: install
 	npm run typecheck

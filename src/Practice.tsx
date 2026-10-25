@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { CheatCard } from './CheatCard';
-import { Diagram } from './Diagram';
+import CheatCard from './CheatCard';
+import Diagram from './Diagram';
 import { determinant, lessons, numberText } from './lessons';
 import type { LessonId } from './lessons';
 import type { LessonProgress } from './progress';
@@ -15,7 +15,20 @@ interface Props {
   onOtherLesson: () => void;
 }
 
-export function Practice({ lessonId: n, progress: p, otherDone, onProgress, onReview, onCard, onOtherLesson }: Props) {
+function taskStatus(index: number, solved: number) {
+  if (index < solved) return 'done';
+  return index === solved ? 'current' : '';
+}
+
+export default function Practice({
+  lessonId: n,
+  progress: p,
+  otherDone,
+  onProgress,
+  onReview,
+  onCard,
+  onOtherLesson,
+}: Props) {
   const [hintOpen, setHintOpen] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [input, setInput] = useState('');
@@ -23,14 +36,19 @@ export function Practice({ lessonId: n, progress: p, otherDone, onProgress, onRe
   const [feedbackKind, setFeedbackKind] = useState<'wrong' | 'correct' | ''>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
-  const lesson = lessons[n], other = n === 2 ? 3 : 2;
+  const lesson = lessons[n];
+  const other = n === 2 ? 3 : 2;
 
   useLayoutEffect(() => {
     if (answered) nextRef.current?.focus({ preventScroll: true });
   }, [answered]);
 
   function resetAnswer() {
-    setAnswered(false); setHintOpen(false); setInput(''); setFeedback(''); setFeedbackKind('');
+    setAnswered(false);
+    setHintOpen(false);
+    setInput('');
+    setFeedback('');
+    setFeedbackKind('');
   }
 
   function checkAnswer() {
@@ -45,11 +63,17 @@ export function Practice({ lessonId: n, progress: p, otherDone, onProgress, onRe
     const answer = determinant(lesson.tasks[p.solved]);
     if (Number(value) !== answer) {
       setFeedbackKind('wrong');
-      setFeedback('Пока не сходится. Проверь произведения и знаки перед ними. Можно открыть шпаргалку или повторить разбор.');
+      setFeedback(
+        'Пока не сходится. Проверь произведения и знаки перед ними. Можно открыть шпаргалку или повторить разбор.',
+      );
       return;
     }
-    setAnswered(true); setInput(numberText(answer)); setFeedbackKind('correct');
-    setFeedback(`Верно! Определитель равен ${numberText(answer)}. ${p.hints.includes(p.solved) ? 'Схема помогла, а вычисления ты сделал сам.' : 'Ты решил эту задачу без открытия шпаргалки.'}`);
+    setAnswered(true);
+    setInput(numberText(answer));
+    setFeedbackKind('correct');
+    setFeedback(
+      `Верно! Определитель равен ${numberText(answer)}. ${p.hints.includes(p.solved) ? 'Схема помогла, а вычисления ты сделал сам.' : 'Ты решил эту задачу без открытия шпаргалки.'}`,
+    );
   }
 
   function nextTask() {
@@ -59,40 +83,152 @@ export function Practice({ lessonId: n, progress: p, otherDone, onProgress, onRe
     resetAnswer();
   }
 
-  if (p.completed) return <div className="complete-card">
-    <div className="complete-mark">✓</div><div className="eyebrow">КАРТОЧКА ОСВОЕНА</div>
-    <h3>{n} × {n} — получилось!</h3>
-    <p>Ты прошёл разбор и решил три задачи. Шпаргалка остаётся в коллекции: к ней можно вернуться в любой момент.</p>
-    <div className="complete-stats"><div><strong>3 / 3</strong><span>задачи решены</span></div><div><strong>{3 - p.hints.length}</strong><span>без открытия схемы</span></div></div>
-    <div className="complete-actions">
-      <button className="primary-button" id="goOtherLesson" onClick={onOtherLesson}>{otherDone ? 'Повторить другой урок' : `Перейти к матрицам ${other} × ${other}`} <span>↗</span></button>
-      <button className="secondary-button" id="repeatPractice" onClick={() => { onProgress({ solved: 0, hints: [], completed: false }); resetAnswer(); }}>Пройти задачи ещё раз</button>
-      <button className="secondary-button" id="viewEarnedCard" onClick={onCard}>Открыть карточку</button>
-    </div>
-  </div>;
+  if (p.completed) {
+    return (
+      <div className="complete-card">
+        <div className="complete-mark">✓</div>
+        <div className="eyebrow">КАРТОЧКА ОСВОЕНА</div>
+        <h3>
+          {`${n} × ${n} — получилось!`}
+        </h3>
+        <p>
+          Ты прошёл разбор и решил три задачи. Шпаргалка остаётся в коллекции: к ней можно вернуться
+          в любой момент.
+        </p>
+        <div className="complete-stats">
+          <div>
+            <strong>3 / 3</strong>
+            <span>задачи решены</span>
+          </div>
+          <div>
+            <strong>{3 - p.hints.length}</strong>
+            <span>без открытия схемы</span>
+          </div>
+        </div>
+        <div className="complete-actions">
+          <button type="button" className="primary-button" id="goOtherLesson" onClick={onOtherLesson}>
+            {otherDone ? 'Повторить другой урок' : `Перейти к матрицам ${other} × ${other}`}
+            {' '}
+            <span>↗</span>
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            id="repeatPractice"
+            onClick={() => {
+              onProgress({ solved: 0, hints: [], completed: false });
+              resetAnswer();
+            }}
+          >
+            Пройти задачи ещё раз
+          </button>
+          <button type="button" className="secondary-button" id="viewEarnedCard" onClick={onCard}>
+            Открыть карточку
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  return <>
-    <div className="practice-top"><span className="eyebrow">ТВОЯ ОЧЕРЕДЬ · ЗАДАЧА {p.solved + 1} ИЗ 3</span>
-      <div className="task-dots">{lesson.tasks.map((_, i) => <span key={i} className={`task-dot ${i < p.solved ? 'done' : i === p.solved ? 'current' : ''}`} />)}</div>
-    </div>
-    <div className="practice-card">
-      <div className="task-header"><h3>Найди определитель</h3><button className="secondary-button" id="hintButton" aria-expanded={hintOpen} onClick={() => {
-        setHintOpen(!hintOpen);
-        if (!hintOpen && !p.hints.includes(p.solved)) onProgress({ hints: [...p.hints, p.solved] });
-      }}>▱ {hintOpen ? 'Скрыть шпаргалку' : 'Показать шпаргалку'}</button></div>
-      <div className="task-body"><div className="task-matrix"><Diagram matrix={lesson.tasks[p.solved]} /></div>
-        <div className="answer-area"><form id="answerForm" onSubmit={event => { event.preventDefault(); checkAnswer(); }}>
-          <label htmlFor="answerInput">Твой ответ</label><div className="answer-row"><span className="det-label">det A =</span>
-            <input ref={inputRef} id="answerInput" type="text" inputMode="decimal" autoComplete="off" aria-describedby="answerHelp feedbackText" placeholder="?" disabled={answered} value={input} onChange={event => setInput(event.target.value)} aria-invalid={feedbackKind === 'wrong' || undefined} />
-          </div><button className="primary-button" type="submit" disabled={answered}>Проверить <span>→</span></button>
-        </form><p className="answer-help" id="answerHelp">Решай на бумаге или в любом редакторе. Сюда введи полученное число.</p></div>
+  return (
+    <>
+      <div className="practice-top">
+        <span className="eyebrow">
+          {`ТВОЯ ОЧЕРЕДЬ · ЗАДАЧА ${p.solved + 1} ИЗ 3`}
+        </span>
+        <div className="task-dots">
+          {lesson.tasks.map((task, i) => (
+            <span
+              key={JSON.stringify(task)}
+              className={`task-dot ${taskStatus(i, p.solved)}`}
+            />
+          ))}
+        </div>
       </div>
-      <div id="taskFeedback" className={`feedback${feedbackKind === 'wrong' ? ' wrong' : ''}`} role="status" hidden={!feedback}>
-        <p id="feedbackText">{feedback}</p>{answered && <button ref={nextRef} className="primary-button" id="nextTask" onClick={nextTask}>{p.solved === 2 ? 'Завершить урок' : 'Следующая задача'} <span>→</span></button>}
+      <div className="practice-card">
+        <div className="task-header">
+          <h3>Найди определитель</h3>
+          <button
+            type="button"
+            className="secondary-button"
+            id="hintButton"
+            aria-expanded={hintOpen}
+            onClick={() => {
+              setHintOpen(!hintOpen);
+              if (!hintOpen && !p.hints.includes(p.solved)) {
+                onProgress({ hints: [...p.hints, p.solved] });
+              }
+            }}
+          >
+            ▱
+            {' '}
+            {hintOpen ? 'Скрыть шпаргалку' : 'Показать шпаргалку'}
+          </button>
+        </div>
+        <div className="task-body">
+          <div className="task-matrix">
+            <Diagram matrix={lesson.tasks[p.solved]} />
+          </div>
+          <div className="answer-area">
+            <form
+              id="answerForm"
+              onSubmit={(event) => {
+                event.preventDefault();
+                checkAnswer();
+              }}
+            >
+              <label htmlFor="answerInput">Твой ответ</label>
+              <div className="answer-row">
+                <span className="det-label">det A =</span>
+                <input
+                  ref={inputRef}
+                  id="answerInput"
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  aria-describedby="answerHelp feedbackText"
+                  placeholder="?"
+                  disabled={answered}
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  aria-invalid={feedbackKind === 'wrong' || undefined}
+                />
+              </div>
+              <button className="primary-button" type="submit" disabled={answered}>
+                Проверить
+                {' '}
+                <span>→</span>
+              </button>
+            </form>
+            <p className="answer-help" id="answerHelp">
+              Решай на бумаге или в любом редакторе. Сюда введи полученное число.
+            </p>
+          </div>
+        </div>
+        <div
+          id="taskFeedback"
+          className={`feedback${feedbackKind === 'wrong' ? ' wrong' : ''}`}
+          role="status"
+          hidden={!feedback}
+        >
+          <p id="feedbackText">{feedback}</p>
+          {answered && (
+            <button type="button" ref={nextRef} className="primary-button" id="nextTask" onClick={nextTask}>
+              {p.solved === 2 ? 'Завершить урок' : 'Следующая задача'}
+              {' '}
+              <span>→</span>
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-    <div id="practiceHint" className="practice-hint" hidden={!hintOpen}><CheatCard lessonId={n} />
-      <div style={{ marginTop: 12, textAlign: 'right' }}><button className="secondary-button" id="reviewExplanation" onClick={onReview}>Посмотреть разбор ещё раз ↗</button></div>
-    </div>
-  </>;
+      <div id="practiceHint" className="practice-hint" hidden={!hintOpen}>
+        <CheatCard lessonId={n} />
+        <div style={{ marginTop: 12, textAlign: 'right' }}>
+          <button type="button" className="secondary-button" id="reviewExplanation" onClick={onReview}>
+            Посмотреть разбор ещё раз ↗
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }

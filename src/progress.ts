@@ -6,4 +6,10 @@ export interface LessonProgress {
   completed: boolean;
 }
 
-export const freshProgress = (): LessonProgress => ({ viewed: [0], card: false, solved: 0, hints: [], completed: false });
+export const freshProgress = (): LessonProgress => ({
+  viewed: [0],
+  card: false,
+  solved: 0,
+  hints: [],
+  completed: false,
+});
