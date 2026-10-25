@@ -90,12 +90,12 @@ export const lessons: Record<LessonId, Lesson> = {
   },
 };
 
-export function determinant(m: Matrix): number {
-  if (m.length === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+export function determinant(matrix: Matrix): number {
+  if (matrix.length === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
   return (
-    m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
-    - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
-    + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0])
+    matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
+    - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
+    + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0])
   );
 }
 
@@ -105,14 +105,14 @@ function productOf(flat: readonly number[], indexes: readonly number[]): number 
   return indexes.reduce((value, i) => value * flat[i], 1);
 }
 
-export function framesFor(n: LessonId): Frame[] {
-  const lesson = lessons[n];
+export function framesFor(lessonId: LessonId): Frame[] {
+  const lesson = lessons[lessonId];
   const flat = lesson.example.flat();
   const frames: Frame[] = [
     {
       kicker: 'НАЧНЁМ С ЗАДАЧИ',
       title: 'Ищем одно число',
-      text: `Определитель — число, которое вычисляют по элементам квадратной матрицы. Сейчас покажем способ для ${n} × ${n}.`,
+      text: `Определитель — число, которое вычисляют по элементам квадратной матрицы. Сейчас покажем способ для ${lessonId} × ${lessonId}.`,
       paths: [],
       expression: 'det A = ?',
     },
@@ -125,10 +125,10 @@ export function framesFor(n: LessonId): Frame[] {
       ? 'Перемножь три выделенных числа. Это первое слагаемое со знаком «+».'
       : 'Перемножь числа в трёх вершинах выделенного треугольника. Прибавь это произведение.';
     frames.push({
-      kicker: n === 2 ? 'ШАГ 01 · ПЛЮС' : `ПЛЮС · ТРОЙКА ${i + 1} ИЗ 3`,
-      title: n === 2 ? 'Главная диагональ' : tripleTitle,
+      kicker: lessonId === 2 ? 'ШАГ 01 · ПЛЮС' : `ПЛЮС · ТРОЙКА ${i + 1} ИЗ 3`,
+      title: lessonId === 2 ? 'Главная диагональ' : tripleTitle,
       text:
-        n === 2
+        lessonId === 2
           ? 'Перемножь два числа на диагонали сверху слева вниз направо.'
           : tripleText,
       paths: [{ indexes, sign: 'positive' }],
@@ -141,11 +141,11 @@ export function framesFor(n: LessonId): Frame[] {
       ? 'Перемножь три выделенных числа. Это произведение и два следующих нужно вычесть.'
       : 'Перемножь числа в вершинах оранжевого треугольника. Это произведение тоже вычитается.';
     frames.push({
-      kicker: n === 2 ? 'ШАГ 02 · МИНУС' : `МИНУС · ТРОЙКА ${i + 1} ИЗ 3`,
+      kicker: lessonId === 2 ? 'ШАГ 02 · МИНУС' : `МИНУС · ТРОЙКА ${i + 1} ИЗ 3`,
       title:
-        n === 2 ? 'Вторая диагональ' : tripleTitle,
+        lessonId === 2 ? 'Вторая диагональ' : tripleTitle,
       text:
-        n === 2
+        lessonId === 2
           ? 'Перемножь числа на второй диагонали. Это произведение нужно вычесть.'
           : tripleText,
       paths: [{ indexes, sign: 'negative' }],
@@ -155,9 +155,9 @@ export function framesFor(n: LessonId): Frame[] {
   });
   frames.push({
     kicker: 'СОБИРАЕМ ОТВЕТ',
-    title: n === 2 ? 'Первое минус второе' : 'Складываем и вычитаем',
+    title: lessonId === 2 ? 'Первое минус второе' : 'Складываем и вычитаем',
     text:
-      n === 2
+      lessonId === 2
         ? 'Из произведения на зелёной диагонали вычти произведение на оранжевой. Получился определитель.'
         : 'Сложи три зелёных произведения и вычти три оранжевых. Так работает правило треугольников для матрицы 3 × 3.',
     paths: [],

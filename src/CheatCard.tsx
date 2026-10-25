@@ -2,10 +2,10 @@ import Diagram from './Diagram';
 import { lessons } from './lessons';
 import type { LessonId, Sign } from './lessons';
 
-export default function CheatCard({ lessonId: n }: { lessonId: LessonId }) {
-  const lesson = lessons[n];
-  const empty = Array.from({ length: n }, () => Array<number>(n).fill(0));
-  const captions = n === 2
+export default function CheatCard({ lessonId }: { lessonId: LessonId }) {
+  const lesson = lessons[lessonId];
+  const empty = Array.from({ length: lessonId }, () => Array<number>(lessonId).fill(0));
+  const captions = lessonId === 2
     ? { positive: 'Первое произведение', negative: 'Второе произведение вычитаем' }
     : { positive: 'Три произведения складываем', negative: 'Три произведения вычитаем' };
   return (
@@ -13,12 +13,12 @@ export default function CheatCard({ lessonId: n }: { lessonId: LessonId }) {
       <div className="cheat-top">
         <span>
           КАРТОЧКА 0
-          {n === 2 ? 1 : 2}
+          {lessonId === 2 ? 1 : 2}
           {' '}
           / МАТЕМАТИКА
         </span>
         <span>
-          {`${n} × ${n}`}
+          {`${lessonId} × ${lessonId}`}
         </span>
       </div>
       <h3>{lesson.name}</h3>
@@ -41,7 +41,7 @@ export default function CheatCard({ lessonId: n }: { lessonId: LessonId }) {
         ))}
       </div>
       <p className="cheat-rule">
-        {n === 2 ? (
+        {lessonId === 2 ? (
           <>
             Перемножь числа вдоль каждой диагонали.
             <br />

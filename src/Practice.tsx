@@ -21,8 +21,8 @@ function taskStatus(index: number, solved: number) {
 }
 
 export default function Practice({
-  lessonId: n,
-  progress: p,
+  lessonId,
+  progress,
   otherDone,
   onProgress,
   onReview,
@@ -36,8 +36,8 @@ export default function Practice({
   const [feedbackKind, setFeedbackKind] = useState<'wrong' | 'correct' | ''>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
-  const lesson = lessons[n];
-  const other = n === 2 ? 3 : 2;
+  const lesson = lessons[lessonId];
+  const other = lessonId === 2 ? 3 : 2;
 
   useLayoutEffect(() => {
     if (answered) nextRef.current?.focus({ preventScroll: true });
@@ -60,7 +60,7 @@ export default function Practice({
       inputRef.current?.focus();
       return;
     }
-    const answer = determinant(lesson.tasks[p.solved]);
+    const answer = determinant(lesson.tasks[progress.solved]);
     if (Number(value) !== answer) {
       setFeedbackKind('wrong');
       setFeedback(
@@ -72,24 +72,24 @@ export default function Practice({
     setInput(numberText(answer));
     setFeedbackKind('correct');
     setFeedback(
-      `Верно! Определитель равен ${numberText(answer)}. ${p.hints.includes(p.solved) ? 'Схема помогла, а вычисления ты сделал сам.' : 'Ты решил эту задачу без открытия шпаргалки.'}`,
+      `Верно! Определитель равен ${numberText(answer)}. ${progress.hints.includes(progress.solved) ? 'Схема помогла, а вычисления ты сделал сам.' : 'Ты решил эту задачу без открытия шпаргалки.'}`,
     );
   }
 
   function nextTask() {
     if (!answered) return;
-    const solved = p.solved + 1;
+    const solved = progress.solved + 1;
     onProgress({ solved, ...(solved === 3 ? { completed: true, card: true } : {}) });
     resetAnswer();
   }
 
-  if (p.completed) {
+  if (progress.completed) {
     return (
       <div className="complete-card">
         <div className="complete-mark">✓</div>
         <div className="eyebrow">КАРТОЧКА ОСВОЕНА</div>
         <h3>
-          {`${n} × ${n} — получилось!`}
+          {`${lessonId} × ${lessonId} — получилось!`}
         </h3>
         <p>
           Ты прошёл разбор и решил три задачи. Шпаргалка остаётся в коллекции: к ней можно вернуться
@@ -101,7 +101,7 @@ export default function Practice({
             <span>задачи решены</span>
           </div>
           <div>
-            <strong>{3 - p.hints.length}</strong>
+            <strong>{3 - progress.hints.length}</strong>
             <span>без открытия схемы</span>
           </div>
         </div>
@@ -134,13 +134,13 @@ export default function Practice({
     <>
       <div className="practice-top">
         <span className="eyebrow">
-          {`ТВОЯ ОЧЕРЕДЬ · ЗАДАЧА ${p.solved + 1} ИЗ 3`}
+          {`ТВОЯ ОЧЕРЕДЬ · ЗАДАЧА ${progress.solved + 1} ИЗ 3`}
         </span>
         <div className="task-dots">
           {lesson.tasks.map((task, i) => (
             <span
               key={JSON.stringify(task)}
-              className={`task-dot ${taskStatus(i, p.solved)}`}
+              className={`task-dot ${taskStatus(i, progress.solved)}`}
             />
           ))}
         </div>
@@ -155,8 +155,8 @@ export default function Practice({
             aria-expanded={hintOpen}
             onClick={() => {
               setHintOpen(!hintOpen);
-              if (!hintOpen && !p.hints.includes(p.solved)) {
-                onProgress({ hints: [...p.hints, p.solved] });
+              if (!hintOpen && !progress.hints.includes(progress.solved)) {
+                onProgress({ hints: [...progress.hints, progress.solved] });
               }
             }}
           >
@@ -167,7 +167,7 @@ export default function Practice({
         </div>
         <div className="task-body">
           <div className="task-matrix">
-            <Diagram matrix={lesson.tasks[p.solved]} />
+            <Diagram matrix={lesson.tasks[progress.solved]} />
           </div>
           <div className="answer-area">
             <form
@@ -214,7 +214,7 @@ export default function Practice({
           <p id="feedbackText">{feedback}</p>
           {answered && (
             <button type="button" ref={nextRef} className="primary-button" id="nextTask" onClick={nextTask}>
-              {p.solved === 2 ? 'Завершить урок' : 'Следующая задача'}
+              {progress.solved === 2 ? 'Завершить урок' : 'Следующая задача'}
               {' '}
               <span>→</span>
             </button>
@@ -222,7 +222,7 @@ export default function Practice({
         </div>
       </div>
       <div id="practiceHint" className="practice-hint" hidden={!hintOpen}>
-        <CheatCard lessonId={n} />
+        <CheatCard lessonId={lessonId} />
         <div style={{ marginTop: 12, textAlign: 'right' }}>
           <button type="button" className="secondary-button" id="reviewExplanation" onClick={onReview}>
             Посмотреть разбор ещё раз ↗

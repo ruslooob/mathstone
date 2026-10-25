@@ -37,7 +37,7 @@ export default function App() {
   });
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string } | null>(null);
-  const n = selection.id;
+  const lessonId = selection.id;
   const total = progress[2].solved + progress[3].solved;
 
   const updateProgress = useCallback((id: LessonId, update: Partial<LessonProgress>) => {
@@ -118,9 +118,9 @@ export default function App() {
               <button
                 type="button"
                 key={id}
-                className={`lesson-button${n === id ? ' active' : ''}`}
+                className={`lesson-button${lessonId === id ? ' active' : ''}`}
                 data-lesson={id}
-                aria-current={n === id ? 'page' : 'false'}
+                aria-current={lessonId === id ? 'page' : 'false'}
                 onClick={() => switchLesson(id)}
               >
                 <span className="lesson-symbol">
@@ -169,14 +169,14 @@ export default function App() {
         </aside>
         <LessonView
           key={selection.revision}
-          lessonId={n}
+          lessonId={lessonId}
           initialCard={selection.card}
-          progress={progress[n]}
-          otherDone={progress[n === 2 ? 3 : 2].completed}
+          progress={progress[lessonId]}
+          otherDone={progress[lessonId === 2 ? 3 : 2].completed}
           collectionOpen={collectionOpen}
           onProgress={updateProgress}
           onViewed={markViewed}
-          onOtherLesson={() => switchLesson(n === 2 ? 3 : 2)}
+          onOtherLesson={() => switchLesson(lessonId === 2 ? 3 : 2)}
           onToast={(message) => setToast({ message })}
         />
       </div>
@@ -211,9 +211,9 @@ interface LessonViewProps {
 }
 
 function LessonView({
-  lessonId: n,
+  lessonId,
   initialCard,
-  progress: p,
+  progress,
   otherDone,
   collectionOpen,
   onProgress,
@@ -222,25 +222,25 @@ function LessonView({
   onToast,
 }: LessonViewProps) {
   const [stage, setStage] = useState<Stage>(initialCard ? 'card' : 'watch');
-  const playback = usePlayback(n);
+  const playback = usePlayback(lessonId);
   const {
     frames, step, playing, revision, diagramRef, goTo, toggle, pause,
   } = playback;
-  const lesson = lessons[n];
+  const lesson = lessons[lessonId];
   const frame = frames[step];
 
   function switchStage(next: Stage) {
     pause();
-    if (next === 'card' && !p.card) {
-      onProgress(n, { card: true });
+    if (next === 'card' && !progress.card) {
+      onProgress(lessonId, { card: true });
       onToast('Карточка добавлена в твою коллекцию.');
     }
     setStage(next);
   }
 
   useEffect(() => {
-    onViewed(n, step);
-  }, [n, step, onViewed]);
+    onViewed(lessonId, step);
+  }, [lessonId, step, onViewed]);
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (
@@ -270,7 +270,7 @@ function LessonView({
           <span>/</span>
           {' '}
           <span id="lessonCrumb">
-            {`МАТРИЦЫ ${n} × ${n}`}
+            {`МАТРИЦЫ ${lessonId} × ${lessonId}`}
           </span>
         </div>
         <span className="prototype-badge">ПЕРВАЯ ВЕРСИЯ</span>
@@ -278,7 +278,7 @@ function LessonView({
       <div className="lesson-heading">
         <div>
           <div className="eyebrow" id="lessonIndex">
-            {`УРОК 0${n === 2 ? 1 : 2} · ОПРЕДЕЛИТЕЛЬ ${n} × ${n}`}
+            {`УРОК 0${lessonId === 2 ? 1 : 2} · ОПРЕДЕЛИТЕЛЬ ${lessonId} × ${lessonId}`}
           </div>
           <h2 id="lessonTitle">
             {lesson.title[0]}
@@ -316,7 +316,7 @@ function LessonView({
           Забираю карточку
           {' '}
           <span className="tab-lock" id="cardLock">
-            {p.card ? '✓' : ''}
+            {progress.card ? '✓' : ''}
           </span>
         </button>
         <button
@@ -331,7 +331,7 @@ function LessonView({
           Решаю
           {' '}
           <span className="tab-lock" id="practiceLock">
-            {p.completed ? '✓' : ''}
+            {progress.completed ? '✓' : ''}
           </span>
         </button>
       </nav>
@@ -400,7 +400,7 @@ function LessonView({
                 <button
                   type="button"
                   key={timelineFrame.kicker}
-                  className={frameStatus(i, step, p.viewed)}
+                  className={frameStatus(i, step, progress.viewed)}
                   data-frame={i}
                   aria-label={`Шаг ${i + 1}`}
                   aria-current={i === step ? 'step' : undefined}
@@ -438,7 +438,7 @@ function LessonView({
             Можно поставить на паузу и вернуться к любому шагу.
           </p>
           <button type="button" id="collectCard" className="primary-button" onClick={() => switchStage('card')}>
-            {p.card ? 'Открыть карточку' : 'Забрать карточку'}
+            {progress.card ? 'Открыть карточку' : 'Забрать карточку'}
             {' '}
             <span>↗</span>
           </button>
@@ -457,7 +457,7 @@ function LessonView({
           </div>
           <span className="earned-badge">✓ В КОЛЛЕКЦИИ</span>
         </div>
-        <CheatCard lessonId={n} />
+        <CheatCard lessonId={lessonId} />
         <div className="card-actions">
           <p>Приготовь бумагу или открой привычный редактор. Дальше попробуешь сам.</p>
           <button
@@ -479,10 +479,10 @@ function LessonView({
         hidden={stage !== 'practice'}
       >
         <Practice
-          lessonId={n}
-          progress={p}
+          lessonId={lessonId}
+          progress={progress}
           otherDone={otherDone}
-          onProgress={(update) => onProgress(n, update)}
+          onProgress={(update) => onProgress(lessonId, update)}
           onReview={() => {
             goTo(0);
             switchStage('watch');

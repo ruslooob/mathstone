@@ -12,23 +12,27 @@ interface Props {
 export default function Diagram({
   matrix, paths = [], schematic = false, label = true,
 }: Props) {
-  const n = matrix.length;
-  const gap = n === 2 ? 105 : 82;
-  const start = n === 2 ? 107.5 : 78;
-  const yStart = n === 2 ? 95 : 61;
+  const matrixSize = matrix.length;
+  const gap = matrixSize === 2 ? 105 : 82;
+  const start = matrixSize === 2 ? 107.5 : 78;
+  const yStart = matrixSize === 2 ? 95 : 61;
   const flat = matrix.flat();
-  const coords = flat.map((_, i) => [start + (i % n) * gap, yStart + Math.floor(i / n) * gap]);
-  const left = n === 2 ? 62 : 38;
+  const coords = flat.map((_, index) => {
+    const x = start + (index % matrixSize) * gap;
+    const y = yStart + Math.floor(index / matrixSize) * gap;
+    return [x, y];
+  });
+  const left = matrixSize === 2 ? 62 : 38;
   const right = 320 - left;
-  const top = n === 2 ? 51 : 24;
-  const bottom = n === 2 ? 243 : 260;
+  const top = matrixSize === 2 ? 51 : 24;
+  const bottom = matrixSize === 2 ? 243 : 260;
 
   return (
     <svg
       viewBox="0 0 320 300"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label={schematic ? 'Схема произведений' : `Матрица ${n} на ${n}`}
+      aria-label={schematic ? 'Схема произведений' : `Матрица ${matrixSize} на ${matrixSize}`}
     >
       <title>
         {schematic
@@ -41,7 +45,7 @@ export default function Diagram({
       />
       {paths.map((path) => {
         const points = path.indexes.map((i) => coords[i]);
-        const close = n === 3
+        const close = matrixSize === 3
           && new Set(points.map((v) => v[0] - v[1])).size !== 1
           && new Set(points.map((v) => v[0] + v[1])).size !== 1;
         return (
@@ -81,7 +85,7 @@ export default function Diagram({
       })}
       {label && !schematic && (
         <text className="matrix-label" x="160" y="290">
-          {`МАТРИЦА A · ${n} × ${n}`}
+          {`МАТРИЦА A · ${matrixSize} × ${matrixSize}`}
         </text>
       )}
     </svg>

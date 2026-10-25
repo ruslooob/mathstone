@@ -18,7 +18,7 @@ export default function Collection({
     if (open && !ref.current?.open) ref.current?.showModal();
     else if (!open && ref.current?.open) ref.current.close();
   }, [open]);
-  const earned = lessonIds.filter((n) => progress[n].card);
+  const earned = lessonIds.filter((lessonId) => progress[lessonId].card);
   return (
     <dialog ref={ref} id="collectionDialog" onClose={onClose}>
       <div className="dialog-top">
@@ -38,28 +38,28 @@ export default function Collection({
       </div>
       <div id="collectionContent">
         {earned.length ? (
-          earned.map((n) => (
-            <article className="collection-entry" key={n}>
+          earned.map((lessonId) => (
+            <article className="collection-entry" key={lessonId}>
               <span className="lesson-symbol">
-                {n}
+                {lessonId}
                 <span>×</span>
-                {n}
+                {lessonId}
               </span>
               <div>
-                <h3>{lessons[n].name}</h3>
+                <h3>{lessons[lessonId].name}</h3>
                 <p>
-                  {progress[n].completed
+                  {progress[lessonId].completed
                     ? '✓ Освоено · 3 задачи решены'
-                    : `Карточка получена · решено ${progress[n].solved} из 3 задач`}
+                    : `Карточка получена · решено ${progress[lessonId].solved} из 3 задач`}
                 </p>
               </div>
               <button
                 type="button"
                 className="secondary-button"
-                data-open-card={n}
+                data-open-card={lessonId}
                 onClick={() => {
                   onClose();
-                  onCard(n);
+                  onCard(lessonId);
                 }}
               >
                 Открыть ↗
