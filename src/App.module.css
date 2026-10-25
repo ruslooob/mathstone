@@ -42,7 +42,7 @@
 }
 
 .sidebar {
-  padding: 44px 28px 24px 40px;
+  padding: 16px 28px 24px 40px;
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -152,11 +152,6 @@
   opacity: 1;
   transform: translate(-50%, 0);
 }
-@media (min-width: 1450px) {
-  .sidebar {
-    padding-top: 48px;
-  }
-}
 @media (max-width: 1150px) {
   .appLayout {
     grid-template-columns: 250px minmax(0, 1fr);
@@ -190,7 +185,7 @@
   }
 
   .sidebar {
-    padding: 22px 22px 0;
+    padding: 16px 22px 0;
     border-right: 0;
     min-height: 0;
   }

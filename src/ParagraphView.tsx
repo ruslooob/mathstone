@@ -12,13 +12,6 @@ import usePlayback from './usePlayback';
 
 type Stage = 'watch' | 'cheatSheet' | 'practice';
 
-function playbackLabel(playing: boolean, step: number, lastStep: number) {
-  if (playing) return 'Ⅱ Пауза';
-  if (step === 0) return '▶ Смотреть';
-  if (step === lastStep) return '↻ Ещё раз';
-  return '▶ Продолжить';
-}
-
 function frameStatus(index: number, step: number, viewed: readonly number[]) {
   if (index === step) return styles.current;
   return viewed.includes(index) ? styles.passed : undefined;
@@ -139,23 +132,7 @@ export default function ParagraphView({
         aria-label="Объяснение способа"
         hidden={stage !== 'watch'}
       >
-        <div className={styles.animationCheatSheet}>
-          <div className={styles.canvasHead}>
-            <div className={styles.canvasActions}>
-              <button
-                type="button"
-                id="startAnimation"
-                className={styles.animationStart}
-                aria-pressed={playing}
-                onClick={toggle}
-              >
-                {playbackLabel(playing, step, frames.length - 1)}
-              </button>
-              <span id="frameCounter">
-                {`${String(step + 1).padStart(2, '0')} / ${String(frames.length).padStart(2, '0')}`}
-              </span>
-            </div>
-          </div>
+        <div className={styles.explanationPanel}>
           <div className={styles.visualStage}>
             <div id="mainDiagram" className={styles.mainDiagram} ref={diagramRef}>
               <Diagram key={`${step}-${revision}`} matrix={paragraph.example} paths={frame.paths} />
@@ -201,6 +178,9 @@ export default function ParagraphView({
                 />
               ))}
             </div>
+            <span className={styles.frameCounter} id="frameCounter">
+              {`${String(step + 1).padStart(2, '0')} / ${String(frames.length).padStart(2, '0')}`}
+            </span>
           </div>
         </div>
       </section>

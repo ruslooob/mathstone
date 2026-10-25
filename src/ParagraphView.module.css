@@ -1,5 +1,5 @@
 .content {
-  padding: 30px 44px 20px;
+  padding: 16px 44px 20px;
   min-width: 0;
 }
 
@@ -8,7 +8,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
-  margin: 36px 0 26px;
+  margin: 0 0 20px;
 }
 
 .paragraphHeading h2 {
@@ -63,21 +63,11 @@
   line-height: 1.5;
 }
 
-.animationCheatSheet {
+.explanationPanel {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
-}
-
-.canvasHead {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 22px 25px;
-  font-size: var(--font-caption);
-  color: var(--muted);
-  letter-spacing: 0.05em;
 }
 
 .visualStage {
@@ -153,6 +143,13 @@
   padding: 18px 24px;
   border-top: 1px solid #ebede4;
   background: #fafbf6;
+}
+
+.frameCounter {
+  margin-left: auto;
+  font-size: var(--font-caption);
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 .playButton {
@@ -238,28 +235,6 @@
   margin-top: 22px;
 }
 
-.canvasActions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.animationStart {
-  border: 1px solid #ced9c5;
-  background: var(--green-light);
-  color: var(--green);
-  border-radius: 6px;
-  padding: 7px 10px;
-  font-size: var(--font-caption);
-  letter-spacing: 0;
-  white-space: nowrap;
-}
-
-.animationStart[aria-pressed="true"] {
-  background: var(--green);
-  border-color: var(--green);
-  color: var(--paper);
-}
 @media (min-width: 1450px) {
   .visualStage {
     min-height: 330px;
@@ -267,14 +242,6 @@
 
   .mainDiagram {
     max-width: 390px;
-  }
-
-  .paragraphHeading {
-    margin-top: 45px;
-  }
-
-  .animationCheatSheet {
-    margin-top: 3px;
   }
 
   .content {
@@ -305,11 +272,7 @@
 }
 @media (max-width: 850px) {
   .content {
-    padding: 22px;
-  }
-
-  .paragraphHeading {
-    margin: 10px 0 25px;
+    padding: 16px 22px 22px;
   }
 
   .visualStage {
@@ -328,12 +291,11 @@
 }
 @media (max-width: 580px) {
   .content {
-    padding: 22px 15px 18px;
+    padding: 16px 15px 18px;
   }
 
   .paragraphHeading {
     align-items: flex-start;
-    margin: 5px 0 23px;
   }
 
   .stageTabs {
@@ -348,10 +310,6 @@
 
   .tabLock {
     display: none;
-  }
-
-  .canvasHead {
-    padding: 17px 18px;
   }
 
   .visualStage {
