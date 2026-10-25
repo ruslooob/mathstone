@@ -37,7 +37,7 @@ module.exports = {
       },
     },
     {
-      files: ['*.config.ts', '.eslintrc.cjs', 'checks/**/*.js'],
+      files: ['*.config.ts', '.eslintrc.cjs', 'checks/**/*.{js,ts}'],
       env: { node: true },
       rules: { 'import/no-extraneous-dependencies': ['error', { devDependencies: true }] },
     },

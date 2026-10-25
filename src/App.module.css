@@ -1,0 +1,243 @@
+.topbar {
+  height: 90px;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  gap: 24px;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: var(--font-brand);
+  letter-spacing: -0.02em;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inventoryTrigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 9px;
+  font-size: var(--font-caption);
+}
+
+.inventoryTrigger > span:last-child {
+  margin-left: 12px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.appLayout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  max-width: 1600px;
+  margin: auto;
+}
+
+.sidebar {
+  padding: 16px 28px 24px 40px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 90px);
+}
+
+.chapterTitle {
+  font-size: var(--font-subheading);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin: 18px 0;
+}
+
+.titleDot {
+  color: var(--orange);
+}
+
+.paragraphList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.paragraphButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 15px 11px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  border-radius: 12px;
+}
+
+.paragraphButton:hover {
+  background: #efefe7;
+}
+
+.paragraphButton.active {
+  background: var(--green-light);
+  border-color: #d6decc;
+}
+
+.paragraphCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.paragraphCopy strong {
+  display: block;
+  font-size: var(--font-caption);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.paragraphCopy small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  margin-top: 5px;
+}
+
+.paragraphStatus {
+  font-size: var(--font-caption);
+  color: #82917e;
+}
+
+.journey {
+  margin-top: 46px;
+  padding: 0 6px;
+}
+
+.journeyTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--font-caption);
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.journeyTop span:last-child {
+  letter-spacing: 0;
+}
+
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  background: var(--green);
+  padding: 13px 20px;
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 5px 25px #243d3420;
+  font-size: var(--font-body);
+  transition: all 0.25s;
+  z-index: 20;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+@media (max-width: 1150px) {
+  .appLayout {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .sidebar {
+    padding-left: 24px;
+    padding-right: 18px;
+  }
+
+  .topbar {
+    padding: 0 25px;
+  }
+}
+@media (max-width: 850px) {
+  .appLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    height: 72px;
+    padding: 0 20px;
+  }
+
+  .inventoryTrigger {
+    padding: 9px 10px;
+  }
+
+  .inventoryTrigger > span:last-child {
+    margin-left: 0;
+  }
+
+  .sidebar {
+    padding: 16px 22px 0;
+    border-right: 0;
+    min-height: 0;
+  }
+
+  .sidebar > .chapterIndex,
+  .sidebar > .chapterTitle,
+  .journey {
+    display: none;
+  }
+
+  .paragraphList {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .paragraphButton {
+    padding: 12px;
+    flex: 1;
+    border: 1px solid var(--line);
+    background: #f9faf4;
+  }
+
+  .paragraphStatus {
+    margin-left: auto;
+  }
+}
+@media (max-width: 580px) {
+  .topbar {
+    padding: 0 15px;
+    gap: 10px;
+    height: 66px;
+  }
+
+  .brand {
+    gap: 4px;
+  }
+
+  .inventoryTrigger {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .sidebar {
+    padding: 16px 15px 0;
+  }
+
+  .paragraphButton {
+    gap: 8px;
+    padding: 10px 8px;
+  }
+
+  .paragraphStatus {
+    display: none;
+  }
+}

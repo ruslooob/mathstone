@@ -1,91 +1,38 @@
-// Browser regression: every lesson stage is accessible without watching the animation.
+// Navigation remains available before a paragraph's cheat sheet is earned.
 export default async (page) => {
   const assert = (condition, message) => {
     if (!condition) throw new Error(message);
   };
   const results = [];
-  for (const n of [2, 3]) {
+  for (const size of [2, 3]) {
     await page.goto('/');
-    await page.locator(`[data-lesson="${n}"]`).click();
+    await page.locator(`[data-paragraph="${size}"]`).click();
     await page.locator('[data-stage="practice"]').click();
-    assert(await page.locator('#practicePanel').isVisible(), `${n}×${n}: practice tab is blocked`);
+    assert(await page.locator('#practicePanel').isVisible(), 'Practice must be accessible');
     assert(await page.locator('#answerInput').isEnabled(), 'Answer field must be usable');
-    await page.locator('#hintButton').click();
+    assert(await page.locator('#hintButton').isDisabled(), 'Unearned cheat sheet must stay closed');
     assert(
-      await page.locator('#practiceHint').isVisible(),
-      'Hint must open before collecting a card',
+      await page.locator('[data-stage="cheatSheet"]').isDisabled(),
+      'Opening a paragraph must not award its cheat sheet',
     );
-    await page.locator('[data-stage="card"]').click();
-    assert(await page.locator('#cardPanel').isVisible(), `${n}×${n}: card tab is blocked`);
+    await page.locator('#inventoryButton').click();
+    assert(await page.locator('#inventoryDialog').isVisible(), 'Inventory must be accessible');
     assert(
-      (await page.locator('#cardCount').innerText()) === '1 / 2',
-      'Opening a card must add it to the collection',
+      (await page.locator('#cheatSheetCount').innerText()) === '0 / 2',
+      'Opening the inventory must not award a cheat sheet',
     );
-    await page.locator('#startPractice').click();
-    assert(await page.locator('#practicePanel').isVisible(), 'Card must link to practice');
+    await page.locator('#closeInventory').click();
     await page.locator('[data-stage="watch"]').click();
-    assert(
-      await page.locator('#watchPanel').isVisible(),
-      'Must be able to return to the explanation',
-    );
-    assert(await page.locator('#collectCard').isEnabled(), 'Collect card button must be enabled');
-    await page.locator('#collectCard').click();
-    assert(await page.locator('#cardPanel').isVisible(), 'Collect button must open the card');
-    await page.locator('#collectionButton').click();
-    await page.locator(`[data-open-card="${n}"]`).click();
-    assert(
-      await page.locator('#cardPanel').isVisible(),
-      'Collection entry must reopen its lesson card',
-    );
-    await page.goto('/');
-    await page.locator(`[data-lesson="${n}"]`).click();
-    assert(
-      await page.locator('#collectCard').isEnabled(),
-      'Collect button must work from the first frame',
-    );
-    await page.locator('#collectCard').click();
-    assert(
-      await page.locator('#cardPanel').isVisible(),
-      'First-frame collection must open the card',
-    );
-    await page.goto('/');
-    await page.locator(`[data-lesson="${n}"]`).click();
+    assert(await page.locator('#watchPanel').isVisible(), 'Explanation must remain accessible');
     await page.locator('[data-stage="practice"]').click();
-    await page.locator('#answerInput').fill('999');
+    await page.locator('#answerInput').fill('10000000');
     await page.locator('#answerForm button').click();
     assert(
       (await page.locator('#feedbackText').innerText()).includes('Пока не сходится'),
       'Wrong answer must be checked',
     );
-    for (const answer of n === 2 ? ['5', '-2', '11'] : ['7', '8', '0']) {
-      await page.locator('#answerInput').fill(answer);
-      await page.locator('#answerForm button').click();
-      assert(await page.locator('#nextTask').isVisible(), 'Correct answer must allow proceeding');
-      await page.locator('#nextTask').click();
-    }
-    assert(
-      await page.locator('.complete-card').isVisible(),
-      'All three tasks must complete the lesson',
-    );
-    assert(
-      (await page.locator('#cardCount').innerText()) === '1 / 2',
-      'Completing practice must award the lesson card',
-    );
-    await page.locator('#viewEarnedCard').click();
-    assert(await page.locator('#cardPanel').isVisible(), 'Completed lesson card must open');
-    await page.locator('[data-stage="practice"]').click();
-    await page.locator('#repeatPractice').click();
-    assert(
-      await page.locator('#answerInput').isEnabled(),
-      'Repeat must open a new practice attempt',
-    );
     results.push({
-      lesson: n,
-      directPractice: true,
-      directCard: true,
-      collectWithoutWatching: true,
-      returnAndCollection: true,
-      threeTasksAndRepeat: true,
+      paragraph: size, directPractice: true, explanation: true, inventory: true,
     });
   }
   return results;

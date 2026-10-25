@@ -1,57 +1,55 @@
-import { useCallback, useEffect, useState } from 'react';
-import CheatCard from './CheatCard';
-import Collection from './Collection';
-import Diagram from './Diagram';
-import Practice from './Practice';
-import { lessonIds, lessons, numberText } from './lessons';
-import type { LessonId } from './lessons';
-import { freshProgress } from './progress';
-import type { LessonProgress } from './progress';
-import usePlayback from './usePlayback';
+import {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
+import ui from './ui.module.css';
+import styles from './App.module.css';
+import Inventory from './Inventory';
+import ParagraphView from './ParagraphView';
+import { paragraphIds, paragraphs } from './paragraphs';
+import type { ParagraphId } from './paragraphs';
+import { freshProgress, hasCheatSheet } from './progress';
+import type { ParagraphProgress, ProgressUpdate } from './progress';
 
-type Stage = 'watch' | 'card' | 'practice';
-
-function lessonStatus(id: LessonId, progress: LessonProgress) {
-  if (progress.completed) return '✓';
-  if (progress.card) return '▱';
+function paragraphStatus(id: ParagraphId, progress: ParagraphProgress) {
+  if (hasCheatSheet(progress)) return '✓';
   return id === 2 ? '01' : '02';
 }
 
-function playbackLabel(playing: boolean, step: number, lastStep: number) {
-  if (playing) return 'Ⅱ Пауза';
-  if (step === 0) return '▶ Смотреть';
-  if (step === lastStep) return '↻ Ещё раз';
-  return '▶ Продолжить';
-}
-
-function frameStatus(index: number, step: number, viewed: readonly number[]) {
-  if (index === step) return 'current';
-  return viewed.includes(index) ? 'passed' : '';
-}
-
 export default function App() {
-  const [selection, setSelection] = useState({ id: 2 as LessonId, revision: 0, card: false });
-  const [progress, setProgress] = useState<Record<LessonId, LessonProgress>>({
-    2: freshProgress(),
-    3: freshProgress(),
+  const [selection, setSelection] = useState({
+    id: 2 as ParagraphId, revision: 0, showCheatSheet: false,
   });
-  const [collectionOpen, setCollectionOpen] = useState(false);
+  const [progress, setProgress] = useState<Record<ParagraphId, ParagraphProgress>>(() => ({
+    2: freshProgress(2),
+    3: freshProgress(3),
+  }));
+  const [inventoryOpen, setInventoryOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string } | null>(null);
-  const lessonId = selection.id;
+  const announcedCheatSheets = useRef(new Set<ParagraphId>());
+  const paragraphId = selection.id;
   const total = progress[2].solved + progress[3].solved;
 
-  const updateProgress = useCallback((id: LessonId, update: Partial<LessonProgress>) => {
-    setProgress((current) => ({ ...current, [id]: { ...current[id], ...update } }));
+  const updateProgress = useCallback((id: ParagraphId, update: ProgressUpdate) => {
+    setProgress((current) => ({ ...current, [id]: update(current[id]) }));
   }, []);
-  const markViewed = useCallback((id: LessonId, step: number) => {
+  const markViewed = useCallback((id: ParagraphId, step: number) => {
     setProgress((current) => (current[id].viewed.includes(step)
       ? current
       : { ...current, [id]: { ...current[id], viewed: [...current[id].viewed, step] } }));
   }, []);
 
-  function switchLesson(id: LessonId, card = false) {
-    setSelection((current) => ({ id, revision: current.revision + 1, card }));
+  function switchParagraph(id: ParagraphId, showCheatSheet = false) {
+    setSelection((current) => ({ id, revision: current.revision + 1, showCheatSheet }));
   }
+
+  useEffect(() => {
+    paragraphIds.forEach((id) => {
+      if (hasCheatSheet(progress[id]) && !announcedCheatSheets.current.has(id)) {
+        announcedCheatSheets.current.add(id);
+        setToast({ message: `Шпаргалка ${id} × ${id} добавлена в инвентарь.` });
+      }
+    });
+  }, [progress]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -61,359 +59,104 @@ export default function App() {
 
   return (
     <>
-      <header className="topbar">
+      <header className={styles.topbar}>
         <a
-          className="brand"
+          className={styles.brand}
           href="/"
           aria-label="Mathstone, на главную"
           onClick={(event) => {
             event.preventDefault();
-            switchLesson(2);
+            switchParagraph(2);
           }}
         >
           Mathstone
         </a>
         <button
           type="button"
-          className="collection-trigger"
-          id="collectionButton"
-          onClick={() => setCollectionOpen(true)}
+          className={styles.inventoryTrigger}
+          id="inventoryButton"
+          onClick={() => setInventoryOpen(true)}
         >
-          <span aria-hidden="true">▱</span>
-          {' '}
           Мои шпаргалки
           {' '}
-          <span id="cardCount">
-            {Number(progress[2].card) + Number(progress[3].card)}
+          <span id="cheatSheetCount">
+            {paragraphIds.filter((id) => hasCheatSheet(progress[id])).length}
             {' '}
             / 2
           </span>
         </button>
       </header>
-      <div className="app-layout">
-        <aside className="sidebar">
-          <div className="eyebrow">МАТЕМАТИКА / ГЛАВА 01</div>
-          <h1>
+      <div className={styles.appLayout}>
+        <aside className={styles.sidebar}>
+          <div className={`${ui.eyebrow} ${styles.chapterIndex}`}>МАТЕМАТИКА / ГЛАВА 01</div>
+          <h1 className={styles.chapterTitle}>
             Определители
             <br />
             матриц
-            <span className="title-dot">.</span>
+            <span className={styles.titleDot}>.</span>
           </h1>
-          <nav className="lesson-list" aria-label="Уроки">
-            {lessonIds.map((id) => (
+          <nav className={styles.paragraphList} aria-label="Параграфы">
+            {paragraphIds.map((id) => (
               <button
                 type="button"
                 key={id}
-                className={`lesson-button${lessonId === id ? ' active' : ''}`}
-                data-lesson={id}
-                aria-current={lessonId === id ? 'page' : 'false'}
-                onClick={() => switchLesson(id)}
+                className={`${styles.paragraphButton}${paragraphId === id ? ` ${styles.active}` : ''}`}
+                data-paragraph={id}
+                aria-current={paragraphId === id ? 'page' : 'false'}
+                onClick={() => switchParagraph(id)}
               >
-                <span className="lesson-symbol">
+                <span className={ui.paragraphSymbol}>
                   {id}
                   <span>×</span>
                   {id}
                 </span>
-                <span className="lesson-copy">
-                  <strong>{lessons[id].name}</strong>
+                <span className={styles.paragraphCopy}>
+                  <strong>{paragraphs[id].name}</strong>
                   <small>
                     {`Определитель ${id} × ${id}`}
                   </small>
                 </span>
-                <span className="lesson-status" id={`status${id}`}>
-                  {lessonStatus(id, progress[id])}
+                <span className={styles.paragraphStatus} id={`status${id}`}>
+                  {paragraphStatus(id, progress[id])}
                 </span>
               </button>
             ))}
           </nav>
-          <div className="journey">
-            <div className="journey-top">
+          <div className={styles.journey}>
+            <div className={styles.journeyTop}>
               <span>ТВОЙ ПУТЬ</span>
               <span id="totalProgress">
                 {total}
                 {' '}
-                / 6 задач
+                задач
               </span>
-            </div>
-            <div className="progress-track">
-              <div id="overallProgress" style={{ width: `${(total / 6) * 100}%` }} />
             </div>
           </div>
         </aside>
-        <LessonView
+        <ParagraphView
           key={selection.revision}
-          lessonId={lessonId}
-          initialCard={selection.card}
-          progress={progress[lessonId]}
-          otherDone={progress[lessonId === 2 ? 3 : 2].completed}
-          collectionOpen={collectionOpen}
+          paragraphId={paragraphId}
+          initialCheatSheet={selection.showCheatSheet}
+          progress={progress[paragraphId]}
+          inventoryOpen={inventoryOpen}
           onProgress={updateProgress}
           onViewed={markViewed}
-          onOtherLesson={() => switchLesson(lessonId === 2 ? 3 : 2)}
-          onToast={(message) => setToast({ message })}
         />
       </div>
-      <Collection
-        open={collectionOpen}
+      <Inventory
+        open={inventoryOpen}
         progress={progress}
-        onClose={() => setCollectionOpen(false)}
-        onCard={(id) => switchLesson(id, true)}
+        onClose={() => setInventoryOpen(false)}
+        onCheatSheet={(id) => switchParagraph(id, true)}
       />
       <div
         id="toast"
-        className={`toast${toast ? ' visible' : ''}`}
+        className={`${styles.toast}${toast ? ` ${styles.visible}` : ''}`}
         role="status"
         aria-live="polite"
       >
         {toast?.message}
       </div>
     </>
-  );
-}
-
-interface LessonViewProps {
-  lessonId: LessonId;
-  initialCard: boolean;
-  progress: LessonProgress;
-  otherDone: boolean;
-  collectionOpen: boolean;
-  onProgress: (lessonId: LessonId, update: Partial<LessonProgress>) => void;
-  onViewed: (lessonId: LessonId, step: number) => void;
-  onOtherLesson: () => void;
-  onToast: (message: string) => void;
-}
-
-function LessonView({
-  lessonId,
-  initialCard,
-  progress,
-  otherDone,
-  collectionOpen,
-  onProgress,
-  onViewed,
-  onOtherLesson,
-  onToast,
-}: LessonViewProps) {
-  const [stage, setStage] = useState<Stage>(initialCard ? 'card' : 'watch');
-  const playback = usePlayback(lessonId);
-  const {
-    frames, step, playing, revision, diagramRef, goTo, toggle, pause,
-  } = playback;
-  const lesson = lessons[lessonId];
-  const frame = frames[step];
-
-  function switchStage(next: Stage) {
-    pause();
-    if (next === 'card' && !progress.card) {
-      onProgress(lessonId, { card: true });
-      onToast('Шпаргалка добавлена в твою коллекцию.');
-    }
-    setStage(next);
-  }
-
-  useEffect(() => {
-    onViewed(lessonId, step);
-  }, [lessonId, step, onViewed]);
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (
-        stage !== 'watch'
-        || collectionOpen
-        || (event.target instanceof Element && event.target.matches('input,button'))
-      ) { return; }
-      if (event.key === 'ArrowRight' && step < frames.length - 1) {
-        event.preventDefault();
-        goTo(step + 1);
-      }
-      if (event.key === 'ArrowLeft' && step > 0) {
-        event.preventDefault();
-        goTo(step - 1);
-      }
-    }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [stage, collectionOpen, step, frames.length, goTo]);
-
-  return (
-    <main id="mainContent">
-      <div className="lesson-heading">
-        <div>
-          <div className="eyebrow" id="lessonIndex">
-            {`УРОК 0${lessonId === 2 ? 1 : 2} · ОПРЕДЕЛИТЕЛЬ ${lessonId} × ${lessonId}`}
-          </div>
-          <h2 id="lessonTitle">
-            {lesson.title[0]}
-            <br />
-            {lesson.title[1]}
-          </h2>
-        </div>
-      </div>
-      <nav className="stage-tabs" aria-label="Этапы урока">
-        <button
-          type="button"
-          data-stage="watch"
-          className={stage === 'watch' ? 'active' : ''}
-          aria-current={stage === 'watch' ? 'step' : 'false'}
-          onClick={() => switchStage('watch')}
-        >
-          <span>01</span>
-          {' '}
-          Смотрю
-        </button>
-        <button
-          type="button"
-          data-stage="card"
-          className={stage === 'card' ? 'active' : ''}
-          aria-current={stage === 'card' ? 'step' : 'false'}
-          onClick={() => switchStage('card')}
-        >
-          <span>02</span>
-          {' '}
-          Забираю шпаргалку
-          {' '}
-          <span className="tab-lock" id="cardLock">
-            {progress.card ? '✓' : ''}
-          </span>
-        </button>
-        <button
-          type="button"
-          data-stage="practice"
-          className={stage === 'practice' ? 'active' : ''}
-          aria-current={stage === 'practice' ? 'step' : 'false'}
-          onClick={() => switchStage('practice')}
-        >
-          <span>03</span>
-          {' '}
-          Решаю
-          {' '}
-          <span className="tab-lock" id="practiceLock">
-            {progress.completed ? '✓' : ''}
-          </span>
-        </button>
-      </nav>
-      <section
-        id="watchPanel"
-        className="stage-panel"
-        aria-label="Объяснение способа"
-        hidden={stage !== 'watch'}
-      >
-        <div className="animation-card">
-          <div className="canvas-head">
-            <div className="canvas-actions">
-              <button
-                type="button"
-                id="startAnimation"
-                className="animation-start"
-                aria-pressed={playing}
-                onClick={toggle}
-              >
-                {playbackLabel(playing, step, frames.length - 1)}
-              </button>
-              <span id="frameCounter">
-                {`${String(step + 1).padStart(2, '0')} / ${String(frames.length).padStart(2, '0')}`}
-              </span>
-            </div>
-          </div>
-          <div className="visual-stage">
-            <div id="mainDiagram" className="main-diagram" ref={diagramRef}>
-              <Diagram key={`${step}-${revision}`} matrix={lesson.example} paths={frame.paths} />
-            </div>
-            <div className="step-explanation">
-              <div className="step-kicker" id="stepKicker">
-                {frame.kicker}
-              </div>
-              <h3 id="stepTitle">{frame.title}</h3>
-              <p id="stepText">{frame.text}</p>
-              <div
-                id="stepExpression"
-                className={`step-expression${frame.negative ? ' negative' : ''}`}
-              >
-                {frame.expression}
-                {frame.result !== undefined && (
-                  <span className="result">{numberText(frame.result)}</span>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="animation-footer">
-            <button
-              type="button"
-              id="playButton"
-              className="play-button"
-              aria-label={playing ? 'Поставить на паузу' : 'Запустить анимацию'}
-              aria-pressed={playing}
-              onClick={toggle}
-            >
-              {playing ? 'Ⅱ' : '▶'}
-            </button>
-            <div className="timeline" id="timeline" aria-label="Шаги объяснения">
-              {frames.map((timelineFrame, i) => (
-                <button
-                  type="button"
-                  key={timelineFrame.kicker}
-                  className={frameStatus(i, step, progress.viewed)}
-                  data-frame={i}
-                  aria-label={`Шаг ${i + 1}`}
-                  aria-current={i === step ? 'step' : undefined}
-                  onClick={() => goTo(i)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="below-canvas">
-          <button type="button" id="collectCard" className="primary-button" onClick={() => switchStage('card')}>
-            {progress.card ? 'Открыть шпаргалку' : 'Забрать шпаргалку'}
-            {' '}
-            <span>↗</span>
-          </button>
-        </div>
-      </section>
-      <section
-        id="cardPanel"
-        className="stage-panel"
-        aria-label="Шпаргалка"
-        hidden={stage !== 'card'}
-      >
-        <div className="card-intro">
-          <div>
-            <h3>Весь приём — в одной шпаргалке</h3>
-          </div>
-          <span className="earned-badge">✓ В КОЛЛЕКЦИИ</span>
-        </div>
-        <CheatCard lessonId={lessonId} />
-        <div className="card-actions">
-          <button
-            type="button"
-            className="primary-button"
-            id="startPractice"
-            onClick={() => switchStage('practice')}
-          >
-            Перейти к задачам
-            {' '}
-            <span>↗</span>
-          </button>
-        </div>
-      </section>
-      <section
-        id="practicePanel"
-        className="stage-panel"
-        aria-label="Самостоятельные задачи"
-        hidden={stage !== 'practice'}
-      >
-        <Practice
-          lessonId={lessonId}
-          progress={progress}
-          otherDone={otherDone}
-          onProgress={(update) => onProgress(lessonId, update)}
-          onReview={() => {
-            goTo(0);
-            switchStage('watch');
-          }}
-          onCard={() => switchStage('card')}
-          onOtherLesson={onOtherLesson}
-        />
-      </section>
-    </main>
   );
 }

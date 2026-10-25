@@ -1,47 +1,53 @@
+import styles from './CheatSheet.module.css';
 import Diagram from './Diagram';
-import { lessons } from './lessons';
-import type { LessonId, Sign } from './lessons';
+import { paragraphs } from './paragraphs';
+import type { ParagraphId, Sign } from './paragraphs';
 
-export default function CheatCard({ lessonId }: { lessonId: LessonId }) {
-  const lesson = lessons[lessonId];
-  const empty = Array.from({ length: lessonId }, () => Array<number>(lessonId).fill(0));
-  const captions = lessonId === 2
+interface Props {
+  paragraphId: ParagraphId;
+  compact?: boolean;
+}
+
+export default function CheatSheet({ paragraphId, compact = false }: Props) {
+  const paragraph = paragraphs[paragraphId];
+  const empty = Array.from({ length: paragraphId }, () => Array<number>(paragraphId).fill(0));
+  const captions = paragraphId === 2
     ? { positive: 'Первое произведение', negative: 'Второе произведение вычитаем' }
     : { positive: 'Три произведения складываем', negative: 'Три произведения вычитаем' };
   return (
-    <article className="cheat-card">
-      <div className="cheat-top">
+    <article className={`${styles.cheatSheet}${compact ? ` ${styles.compact}` : ''}`}>
+      <div className={styles.cheatTop}>
         <span>
           ШПАРГАЛКА 0
-          {lessonId === 2 ? 1 : 2}
+          {paragraphId === 2 ? 1 : 2}
           {' '}
           / МАТЕМАТИКА
         </span>
         <span>
-          {`${lessonId} × ${lessonId}`}
+          {`${paragraphId} × ${paragraphId}`}
         </span>
       </div>
-      <h3>{lesson.name}</h3>
-      <div className="scheme-pair">
+      <h3>{paragraph.name}</h3>
+      <div className={styles.schemePair}>
         {(['positive', 'negative'] as const).map((sign: Sign) => (
-          <div className="scheme-block" key={sign}>
-            <div className={`scheme-sign${sign === 'negative' ? ' negative' : ''}`}>
+          <div className={styles.schemeBlock} key={sign}>
+            <div className={`${styles.schemeSign}${sign === 'negative' ? ` ${styles.negative}` : ''}`}>
               {sign === 'positive' ? '+' : '−'}
             </div>
             <Diagram
               matrix={empty}
-              paths={lesson[sign].map((indexes) => ({ indexes, sign }))}
+              paths={paragraph[sign].map((indexes) => ({ indexes, sign }))}
               schematic
               label={false}
             />
-            <p className="scheme-caption">
+            <p className={styles.schemeCaption}>
               {captions[sign]}
             </p>
           </div>
         ))}
       </div>
-      <p className="cheat-rule">
-        {lessonId === 2 ? (
+      <p className={styles.cheatRule}>
+        {paragraphId === 2 ? (
           <>
             Перемножь числа вдоль каждой диагонали.
             <br />

@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
-import { numberText } from './lessons';
-import type { DiagramPath, Matrix } from './lessons';
+import styles from './Diagram.module.css';
+import { numberText } from './paragraphs';
+import type { DiagramPath, Matrix } from './paragraphs';
 
 interface Props {
   matrix: Matrix;
@@ -40,7 +41,7 @@ export default function Diagram({
           : matrix.map((row) => row.join(', ')).join('; ')}
       </title>
       <path
-        className="matrix-bracket"
+        className={styles.matrixBracket}
         d={`M${left + 8} ${top} H${left} V${bottom} H${left + 8} M${right - 8} ${top} H${right} V${bottom} H${right - 8}`}
       />
       {paths.map((path) => {
@@ -51,7 +52,7 @@ export default function Diagram({
         return (
           <path
             key={`${path.sign}-${path.indexes.join('-')}`}
-            className={`matrix-path ${path.sign}`}
+            className={`${styles.matrixPath} ${styles[path.sign]}`}
             d={
               `${points.map((point, i) => `${i ? 'L' : 'M'}${point.join(' ')}`).join(' ')}${close ? ' Z' : ''}`
             }
@@ -60,31 +61,33 @@ export default function Diagram({
       })}
       {coords.map(([x, y], i) => {
         const active = paths.find((path) => path.indexes.includes(i));
-        const activeColor = active?.sign === 'positive' ? '#285c45' : '#cd7046';
+        const activeClass = active
+          ? styles[active.sign === 'positive' ? 'onPositive' : 'onNegative']
+          : '';
         return schematic ? (
           <circle
             key={`${x}-${y}`}
             cx={x}
             cy={y}
             r="7"
-            fill={active ? activeColor : '#75816f'}
+            className={`${styles.schematicNode}${active ? ` ${styles[active.sign]}` : ''}`}
           />
         ) : (
           <Fragment key={`${x}-${y}`}>
             <circle
-              className={`matrix-node${active ? ` on-${active.sign}` : ''}`}
+              className={`${styles.matrixNode} ${activeClass}`}
               cx={x}
               cy={y}
               r="26"
             />
-            <text className="matrix-number" x={x} y={y + 1}>
+            <text className={styles.matrixNumber} x={x} y={y + 1}>
               {numberText(flat[i])}
             </text>
           </Fragment>
         );
       })}
       {label && !schematic && (
-        <text className="matrix-label" x="160" y="290">
+        <text className={styles.matrixLabel} x="160" y="290">
           {`МАТРИЦА A · ${matrixSize} × ${matrixSize}`}
         </text>
       )}

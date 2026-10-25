@@ -1,0 +1,101 @@
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  font-size: var(--font-symbol);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.dialog {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--bg);
+  width: min(620px, calc(100vw - 30px));
+  max-height: 90vh;
+  padding: 28px;
+  color: var(--ink);
+}
+
+.dialog::backdrop {
+  background: #1a2c2266;
+  backdrop-filter: blur(4px);
+}
+
+.dialogTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.dialogTop h2 {
+  font-size: var(--font-subheading);
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  margin: 8px 0 0;
+}
+
+.emptyInventory {
+  padding: 35px 20px;
+  text-align: center;
+  background: var(--paper);
+  border: 1px dashed #ccd4c3;
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: var(--font-body);
+  line-height: 1.5;
+}
+
+.inventoryEntry {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  padding: 18px;
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.inventoryEntry .entrySymbol {
+  font-size: var(--font-symbol);
+}
+
+.inventoryEntry > div {
+  flex: 1;
+}
+
+.inventoryEntry h3 {
+  margin: 0 0 6px;
+  font-weight: 500;
+  font-size: var(--font-body);
+}
+
+.inventoryEntry p {
+  font-size: var(--font-caption);
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.inventoryEntry button {
+  font-size: var(--font-caption);
+}
+@media (max-width: 580px) {
+  .inventoryEntry {
+    padding: 15px 12px;
+    gap: 10px;
+  }
+
+  .inventoryEntry button {
+    padding: 9px;
+  }
+
+  .dialog {
+    padding: 23px 18px;
+  }
+}

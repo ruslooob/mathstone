@@ -1,15 +1,25 @@
-export interface LessonProgress {
+import type { ParagraphId, Matrix } from './paragraphs';
+import generateTask from './tasks';
+
+export interface ParagraphProgress {
   viewed: number[];
-  card: boolean;
   solved: number;
-  hints: number[];
-  completed: boolean;
+  task: {
+    matrix: Matrix;
+    solved: boolean;
+  };
 }
 
-export const freshProgress = (): LessonProgress => ({
+export type ProgressUpdate = (current: ParagraphProgress) => ParagraphProgress;
+
+export const solutionsForCheatSheet = 2;
+
+export function hasCheatSheet(progress: ParagraphProgress): boolean {
+  return progress.solved >= solutionsForCheatSheet;
+}
+
+export const freshProgress = (paragraphId: ParagraphId): ParagraphProgress => ({
   viewed: [0],
-  card: false,
   solved: 0,
-  hints: [],
-  completed: false,
+  task: { matrix: generateTask(paragraphId, 0), solved: false },
 });

@@ -1,13 +1,13 @@
 import {
   useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from 'react';
-import { framesFor } from './lessons';
-import type { LessonId } from './lessons';
+import { framesFor } from './paragraphs';
+import type { ParagraphId } from './paragraphs';
 
 const FRAME_DURATION = 2000;
 
-export default function usePlayback(lessonId: LessonId) {
-  const frames = useMemo(() => framesFor(lessonId), [lessonId]);
+export default function usePlayback(paragraphId: ParagraphId) {
+  const frames = useMemo(() => framesFor(paragraphId), [paragraphId]);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [revision, setRevision] = useState(0);

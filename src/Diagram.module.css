@@ -1,0 +1,82 @@
+.schematicNode {
+  fill: #75816f;
+}
+
+.schematicNode.positive {
+  fill: var(--green);
+}
+
+.schematicNode.negative {
+  fill: var(--orange);
+}
+
+.matrixBracket {
+  stroke: #718174;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.matrixNumber {
+  font-family: var(--font);
+  font-size: var(--font-matrix);
+  font-weight: 500;
+  fill: var(--ink);
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+
+.matrixNode {
+  fill: var(--paper);
+  stroke: transparent;
+  stroke-width: 1.5;
+  transition:
+    fill 0.3s,
+    stroke 0.3s;
+}
+
+.matrixNode.onPositive {
+  fill: #e9f0e4;
+  stroke: #a8bda2;
+}
+
+.matrixNode.onNegative {
+  fill: #f9e8dc;
+  stroke: #d4a384;
+}
+
+.matrixPath {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-width: 3;
+  opacity: 0.78;
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
+  animation: draw-line 1s ease forwards;
+}
+
+.matrixPath.positive {
+  stroke: var(--green);
+}
+
+.matrixPath.negative {
+  stroke: var(--orange);
+}
+
+.matrixLabel {
+  font-size: var(--font-caption);
+  fill: var(--muted);
+  text-anchor: middle;
+  letter-spacing: 0.05em;
+}
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .matrixPath {
+    stroke-dashoffset: 0;
+  }
+}
