@@ -1,4 +1,4 @@
-.PHONY: start install lint typecheck test build preview
+.PHONY: start install lint lint-fix typecheck test build preview
 .DEFAULT_GOAL := start
 
 start: install
@@ -11,6 +11,9 @@ node_modules/.package-lock.json: package.json package-lock.json
 
 lint: install
 	npm run lint
+
+lint-fix: install
+	npm run lint:fix
 
 typecheck: install
 	npm run typecheck
