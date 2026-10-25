@@ -1,33 +1,33 @@
-import styles from './CheatCard.module.css';
+import styles from './CheatSheet.module.css';
 import Diagram from './Diagram';
-import { lessons } from './lessons';
-import type { LessonId, Sign } from './lessons';
+import { paragraphs } from './paragraphs';
+import type { ParagraphId, Sign } from './paragraphs';
 
 interface Props {
-  lessonId: LessonId;
+  paragraphId: ParagraphId;
   compact?: boolean;
 }
 
-export default function CheatCard({ lessonId, compact = false }: Props) {
-  const lesson = lessons[lessonId];
-  const empty = Array.from({ length: lessonId }, () => Array<number>(lessonId).fill(0));
-  const captions = lessonId === 2
+export default function CheatSheet({ paragraphId, compact = false }: Props) {
+  const paragraph = paragraphs[paragraphId];
+  const empty = Array.from({ length: paragraphId }, () => Array<number>(paragraphId).fill(0));
+  const captions = paragraphId === 2
     ? { positive: 'Первое произведение', negative: 'Второе произведение вычитаем' }
     : { positive: 'Три произведения складываем', negative: 'Три произведения вычитаем' };
   return (
-    <article className={`${styles.cheatCard}${compact ? ` ${styles.compact}` : ''}`}>
+    <article className={`${styles.cheatSheet}${compact ? ` ${styles.compact}` : ''}`}>
       <div className={styles.cheatTop}>
         <span>
           ШПАРГАЛКА 0
-          {lessonId === 2 ? 1 : 2}
+          {paragraphId === 2 ? 1 : 2}
           {' '}
           / МАТЕМАТИКА
         </span>
         <span>
-          {`${lessonId} × ${lessonId}`}
+          {`${paragraphId} × ${paragraphId}`}
         </span>
       </div>
-      <h3>{lesson.name}</h3>
+      <h3>{paragraph.name}</h3>
       <div className={styles.schemePair}>
         {(['positive', 'negative'] as const).map((sign: Sign) => (
           <div className={styles.schemeBlock} key={sign}>
@@ -36,7 +36,7 @@ export default function CheatCard({ lessonId, compact = false }: Props) {
             </div>
             <Diagram
               matrix={empty}
-              paths={lesson[sign].map((indexes) => ({ indexes, sign }))}
+              paths={paragraph[sign].map((indexes) => ({ indexes, sign }))}
               schematic
               label={false}
             />
@@ -47,7 +47,7 @@ export default function CheatCard({ lessonId, compact = false }: Props) {
         ))}
       </div>
       <p className={styles.cheatRule}>
-        {lessonId === 2 ? (
+        {paragraphId === 2 ? (
           <>
             Перемножь числа вдоль каждой диагонали.
             <br />

@@ -9,7 +9,15 @@
   --orange: #cd7046;
   --orange-light: #faeee4;
   --purple: #8d79a8;
-  --font: "Golos Text", Arial, sans-serif;
+  --font: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-caption: 13px;
+  --font-body: 14px;
+  --font-subheading: 22px;
+  --font-heading: 26px;
+  --font-math: 22px;
+  --font-matrix: 28px;
+  --font-brand: 20px;
+  --font-symbol: 20px;
 }
 
 * {
@@ -21,8 +29,14 @@ body {
   background: var(--bg);
   font-family: var(--font);
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--font-body);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+@media (max-width: 580px) {
+  :root {
+    --font-heading: 22px;
+  }
 }
 
 button,

@@ -3,7 +3,7 @@
   place-items: center;
   min-width: 32px;
   height: 32px;
-  font-size: 17px;
+  font-size: var(--font-symbol);
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -33,24 +33,24 @@
 }
 
 .dialogTop h2 {
-  font-size: 25px;
-  letter-spacing: -1px;
+  font-size: var(--font-subheading);
+  letter-spacing: -0.02em;
   font-weight: 500;
   margin: 8px 0 0;
 }
 
-.emptyCollection {
+.emptyInventory {
   padding: 35px 20px;
   text-align: center;
   background: var(--paper);
   border: 1px dashed #ccd4c3;
   border-radius: 12px;
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1.9;
+  font-size: var(--font-body);
+  line-height: 1.5;
 }
 
-.collectionEntry {
+.inventoryEntry {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -61,55 +61,38 @@
   align-items: center;
 }
 
-.collectionEntry .entrySymbol {
-  font-size: 30px;
+.inventoryEntry .entrySymbol {
+  font-size: var(--font-symbol);
 }
 
-.collectionEntry > div {
+.inventoryEntry > div {
   flex: 1;
 }
 
-.collectionEntry h3 {
+.inventoryEntry h3 {
   margin: 0 0 6px;
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--font-body);
 }
 
-.collectionEntry p {
-  font-size: 10px;
+.inventoryEntry p {
+  font-size: var(--font-caption);
   color: var(--muted);
   margin: 0;
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
-.collectionEntry button {
-  font-size: 10px;
+.inventoryEntry button {
+  font-size: var(--font-caption);
 }
 @media (max-width: 580px) {
-  .collectionEntry {
+  .inventoryEntry {
     padding: 15px 12px;
     gap: 10px;
   }
 
-  .collectionEntry h3 {
-    font-size: 12px;
-  }
-
-  .collectionEntry p {
-    font-size: 9px;
-  }
-
-  .collectionEntry .entrySymbol {
-    font-size: 23px;
-  }
-
-  .collectionEntry button {
-    font-size: 9px;
+  .inventoryEntry button {
     padding: 9px;
-  }
-
-  .dialogTop h2 {
-    font-size: 23px;
   }
 
   .dialog {

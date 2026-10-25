@@ -1,12 +1,12 @@
-export type LessonId = 2 | 3;
+export type ParagraphId = 2 | 3;
 export type Matrix = readonly (readonly number[])[];
 export type Sign = 'positive' | 'negative';
 export interface DiagramPath {
   indexes: readonly number[];
   sign: Sign;
 }
-interface Lesson {
-  title: readonly [string, string];
+interface Paragraph {
+  title: string;
   name: string;
   example: Matrix;
   positive: readonly (readonly number[])[];
@@ -22,10 +22,10 @@ export interface Frame {
   negative?: boolean;
 }
 
-export const lessonIds: readonly LessonId[] = [2, 3];
-export const lessons: Record<LessonId, Lesson> = {
+export const paragraphIds: readonly ParagraphId[] = [2, 3];
+export const paragraphs: Record<ParagraphId, Paragraph> = {
   2: {
-    title: ['Две диагонали.', 'Один ответ.'],
+    title: 'Две диагонали.',
     name: 'Две диагонали',
     example: [
       [3, 2],
@@ -35,7 +35,7 @@ export const lessons: Record<LessonId, Lesson> = {
     negative: [[1, 2]],
   },
   3: {
-    title: ['Три тройки в плюс.', 'Три — в минус.'],
+    title: 'Три тройки в плюс. Три — в минус.',
     name: 'Правило треугольников',
     example: [
       [2, 1, 3],
@@ -70,19 +70,19 @@ function productOf(flat: readonly number[], indexes: readonly number[]): number 
   return indexes.reduce((value, i) => value * flat[i], 1);
 }
 
-export function framesFor(lessonId: LessonId): Frame[] {
-  const lesson = lessons[lessonId];
-  const flat = lesson.example.flat();
+export function framesFor(paragraphId: ParagraphId): Frame[] {
+  const paragraph = paragraphs[paragraphId];
+  const flat = paragraph.example.flat();
   const frames: Frame[] = [
     {
       kicker: 'НАЧНЁМ С ЗАДАЧИ',
       title: 'Ищем одно число',
-      text: `Определитель — число, которое вычисляют по элементам квадратной матрицы. Сейчас покажем способ для ${lessonId} × ${lessonId}.`,
+      text: `Определитель — число, которое вычисляют по элементам квадратной матрицы. Сейчас покажем способ для ${paragraphId} × ${paragraphId}.`,
       paths: [],
       expression: 'det A = ?',
     },
   ];
-  lesson.positive.forEach((indexes, i) => {
+  paragraph.positive.forEach((indexes, i) => {
     const tripleTitle = i === 0
       ? 'Первая тройка — диагональ'
       : 'Следующая тройка — треугольник';
@@ -90,27 +90,27 @@ export function framesFor(lessonId: LessonId): Frame[] {
       ? 'Перемножь три выделенных числа. Это первое слагаемое со знаком «+».'
       : 'Перемножь числа в трёх вершинах выделенного треугольника. Прибавь это произведение.';
     frames.push({
-      kicker: lessonId === 2 ? 'ШАГ 01 · ПЛЮС' : `ПЛЮС · ТРОЙКА ${i + 1} ИЗ 3`,
-      title: lessonId === 2 ? 'Главная диагональ' : tripleTitle,
+      kicker: paragraphId === 2 ? 'ШАГ 01 · ПЛЮС' : `ПЛЮС · ТРОЙКА ${i + 1} ИЗ 3`,
+      title: paragraphId === 2 ? 'Главная диагональ' : tripleTitle,
       text:
-        lessonId === 2
+        paragraphId === 2
           ? 'Перемножь два числа на диагонали сверху слева вниз направо.'
           : tripleText,
       paths: [{ indexes, sign: 'positive' }],
       expression: `${indexes.map((j) => factorText(flat[j])).join(' × ')} = ${numberText(productOf(flat, indexes))}`,
     });
   });
-  lesson.negative.forEach((indexes, i) => {
+  paragraph.negative.forEach((indexes, i) => {
     const tripleTitle = i === 0 ? 'Теперь другая диагональ' : 'Ещё один треугольник';
     const tripleText = i === 0
       ? 'Перемножь три выделенных числа. Это произведение и два следующих нужно вычесть.'
       : 'Перемножь числа в вершинах оранжевого треугольника. Это произведение тоже вычитается.';
     frames.push({
-      kicker: lessonId === 2 ? 'ШАГ 02 · МИНУС' : `МИНУС · ТРОЙКА ${i + 1} ИЗ 3`,
+      kicker: paragraphId === 2 ? 'ШАГ 02 · МИНУС' : `МИНУС · ТРОЙКА ${i + 1} ИЗ 3`,
       title:
-        lessonId === 2 ? 'Вторая диагональ' : tripleTitle,
+        paragraphId === 2 ? 'Вторая диагональ' : tripleTitle,
       text:
-        lessonId === 2
+        paragraphId === 2
           ? 'Перемножь числа на второй диагонали. Это произведение нужно вычесть.'
           : tripleText,
       paths: [{ indexes, sign: 'negative' }],
@@ -120,14 +120,14 @@ export function framesFor(lessonId: LessonId): Frame[] {
   });
   frames.push({
     kicker: 'СОБИРАЕМ ОТВЕТ',
-    title: lessonId === 2 ? 'Первое минус второе' : 'Складываем и вычитаем',
+    title: paragraphId === 2 ? 'Первое минус второе' : 'Складываем и вычитаем',
     text:
-      lessonId === 2
+      paragraphId === 2
         ? 'Из произведения на зелёной диагонали вычти произведение на оранжевой.'
         : 'Сложи три зелёных произведения и вычти три оранжевых.',
     paths: [],
-    expression: `${lesson.positive.map((p) => factorText(productOf(flat, p))).join(' + ')} − ${lesson.negative.map((p) => factorText(productOf(flat, p))).join(' − ')} = `,
-    result: determinant(lesson.example),
+    expression: `${paragraph.positive.map((p) => factorText(productOf(flat, p))).join(' + ')} − ${paragraph.negative.map((p) => factorText(productOf(flat, p))).join(' − ')} = `,
+    result: determinant(paragraph.example),
   });
   return frames;
 }

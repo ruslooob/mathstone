@@ -1,22 +1,23 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import ui from './ui.module.css';
-import CheatCard from './CheatCard';
+import CheatSheet from './CheatSheet';
 import Diagram from './Diagram';
-import { determinant, numberText } from './lessons';
-import type { LessonId } from './lessons';
-import type { LessonProgress, ProgressUpdate } from './progress';
+import { determinant, numberText } from './paragraphs';
+import type { ParagraphId } from './paragraphs';
+import type { ParagraphProgress, ProgressUpdate } from './progress';
+import { hasCheatSheet, solutionsForCheatSheet } from './progress';
 import generateTask from './tasks';
 import styles from './Practice.module.css';
 
 interface Props {
-  lessonId: LessonId;
-  progress: LessonProgress;
+  paragraphId: ParagraphId;
+  progress: ParagraphProgress;
   onProgress: (update: ProgressUpdate) => void;
   onReview: () => void;
 }
 
 export default function Practice({
-  lessonId,
+  paragraphId,
   progress,
   onProgress,
   onReview,
@@ -28,6 +29,7 @@ export default function Practice({
   const actionRef = useRef<HTMLButtonElement>(null);
   const answered = progress.task.solved;
   const answer = determinant(progress.task.matrix);
+  const cheatSheetUnlocked = hasCheatSheet(progress);
 
   useLayoutEffect(() => {
     if (answered) actionRef.current?.focus({ preventScroll: true });
@@ -59,7 +61,7 @@ export default function Practice({
 
   function nextTask() {
     if (!answered) return;
-    const matrix = generateTask(lessonId, progress.solved);
+    const matrix = generateTask(paragraphId, progress.solved);
     onProgress((current) => (current.task === progress.task && current.task.solved
       ? { ...current, task: { matrix, solved: false } }
       : current));
@@ -80,13 +82,15 @@ export default function Practice({
             type="button"
             className={`${ui.secondaryButton} ${styles.hintButton}`}
             id="hintButton"
+            disabled={!cheatSheetUnlocked}
+            title={cheatSheetUnlocked
+              ? undefined
+              : `Откроется после ${solutionsForCheatSheet} верных решений этого параграфа.`}
             aria-expanded={hintOpen}
             onClick={() => {
               setHintOpen(!hintOpen);
             }}
           >
-            ▱
-            {' '}
             {hintOpen ? 'Скрыть шпаргалку' : 'Показать шпаргалку'}
           </button>
         </div>
@@ -144,7 +148,7 @@ export default function Practice({
         </div>
       </div>
       <div id="practiceHint" className={styles.practiceHint} hidden={!hintOpen}>
-        <CheatCard lessonId={lessonId} compact />
+        {cheatSheetUnlocked && <CheatSheet paragraphId={paragraphId} compact />}
         <div className={styles.reviewActions}>
           <button type="button" className={ui.secondaryButton} id="reviewExplanation" onClick={onReview}>
             Посмотреть разбор ещё раз ↗

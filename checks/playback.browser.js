@@ -9,7 +9,7 @@ export default async (page) => {
   await page.clock.pauseAt(new Date('2026-01-01T00:01:00Z'));
   const results = [];
   for (const n of [2, 3]) {
-    await page.locator(`[data-lesson="${n}"]`).click();
+    await page.locator(`[data-paragraph="${n}"]`).click();
     await page.locator('#playButton').click();
     const start = await page.locator('#frameCounter').innerText();
     assert(
@@ -58,12 +58,8 @@ export default async (page) => {
       (await page.locator('#playButton').getAttribute('aria-label')) === 'Запустить анимацию',
       'Playback must stop at the final frame',
     );
-    assert(
-      await page.locator('#collectCard').isEnabled(),
-      'Finished playback must unlock the card',
-    );
     results.push({
-      lesson: n,
+      paragraph: n,
       immediateMotion: true,
       pauseAndResume: true,
       automaticCompletion: true,

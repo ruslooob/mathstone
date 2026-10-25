@@ -1,9 +1,8 @@
-import type { LessonId, Matrix } from './lessons';
+import type { ParagraphId, Matrix } from './paragraphs';
 import generateTask from './tasks';
 
-export interface LessonProgress {
+export interface ParagraphProgress {
   viewed: number[];
-  card: boolean;
   solved: number;
   task: {
     matrix: Matrix;
@@ -11,11 +10,16 @@ export interface LessonProgress {
   };
 }
 
-export type ProgressUpdate = (current: LessonProgress) => LessonProgress;
+export type ProgressUpdate = (current: ParagraphProgress) => ParagraphProgress;
 
-export const freshProgress = (lessonId: LessonId): LessonProgress => ({
+export const solutionsForCheatSheet = 2;
+
+export function hasCheatSheet(progress: ParagraphProgress): boolean {
+  return progress.solved >= solutionsForCheatSheet;
+}
+
+export const freshProgress = (paragraphId: ParagraphId): ParagraphProgress => ({
   viewed: [0],
-  card: false,
   solved: 0,
-  task: { matrix: generateTask(lessonId, 0), solved: false },
+  task: { matrix: generateTask(paragraphId, 0), solved: false },
 });

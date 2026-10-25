@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { determinant } from '../src/lessons';
+import { determinant } from '../src/paragraphs';
 
 test('определитель 2×2: положительные элементы, отрицательные элементы и ноль', () => {
   expect(determinant([[3, 2], [1, 4]])).toBe(10);

@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import styles from './Diagram.module.css';
-import { numberText } from './lessons';
-import type { DiagramPath, Matrix } from './lessons';
+import { numberText } from './paragraphs';
+import type { DiagramPath, Matrix } from './paragraphs';
 
 interface Props {
   matrix: Matrix;

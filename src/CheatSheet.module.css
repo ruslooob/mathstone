@@ -1,4 +1,4 @@
-.cheatCard {
+.cheatSheet {
   background: var(--paper);
   border: 1px solid #d5ddcb;
   border-radius: 16px;
@@ -7,7 +7,7 @@
   overflow: hidden;
 }
 
-.cheatCard:before {
+.cheatSheet:before {
   content: "";
   position: absolute;
   top: 0;
@@ -21,14 +21,14 @@
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font-size: 9px;
-  letter-spacing: 1px;
+  font-size: var(--font-caption);
+  letter-spacing: 0.05em;
 }
 
-.cheatCard h3 {
-  font-size: 26px;
+.cheatSheet h3 {
+  font-size: var(--font-subheading);
   font-weight: 500;
-  letter-spacing: -0.7px;
+  letter-spacing: -0.02em;
   margin: 12px 0 16px;
 }
 
@@ -52,7 +52,7 @@
 }
 
 .schemeSign {
-  font-size: 27px;
+  font-size: var(--font-math);
   color: var(--green);
   font-weight: 500;
 }
@@ -62,14 +62,14 @@
 }
 
 .schemeCaption {
-  font-size: 10px;
+  font-size: var(--font-caption);
   color: var(--muted);
   margin-top: 0;
 }
 
 .cheatRule {
-  font-size: 12px;
-  line-height: 1.8;
+  font-size: var(--font-body);
+  line-height: 1.5;
   text-align: center;
   margin: 20px auto 0;
   color: #67715f;
@@ -81,12 +81,12 @@
   font-weight: 500;
 }
 
-.cheatCard.compact {
+.cheatSheet.compact {
   background: #fbfcf6;
 }
 
-.cheatCard.compact h3 {
-  font-size: 20px;
+.cheatSheet.compact h3 {
+  font-size: var(--font-subheading);
 }
 
 .compact .schemePair {
@@ -97,27 +97,11 @@
   max-width: 165px;
 }
 @media (max-width: 580px) {
-  .cheatCard {
+  .cheatSheet {
     padding: 19px 18px;
-  }
-
-  .cheatCard h3 {
-    font-size: 22px;
   }
 
   .schemePair {
     gap: 6px;
-  }
-
-  .cheatTop {
-    font-size: 8px;
-  }
-
-  .cheatRule {
-    font-size: 11px;
-  }
-
-  .schemeCaption {
-    font-size: 9px;
   }
 }

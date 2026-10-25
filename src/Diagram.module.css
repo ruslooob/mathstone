@@ -18,8 +18,8 @@
 }
 
 .matrixNumber {
-  font-family: "Manrope", Arial, sans-serif;
-  font-size: 30px;
+  font-family: var(--font);
+  font-size: var(--font-matrix);
   font-weight: 500;
   fill: var(--ink);
   dominant-baseline: middle;
@@ -65,10 +65,10 @@
 }
 
 .matrixLabel {
-  font-size: 10px;
+  font-size: var(--font-caption);
   fill: var(--muted);
   text-anchor: middle;
-  letter-spacing: 1px;
+  letter-spacing: 0.05em;
 }
 @keyframes draw-line {
   to {
