@@ -6,13 +6,12 @@ import Practice from './Practice';
 import { lessonIds, lessons, numberText } from './lessons';
 import type { LessonId } from './lessons';
 import { freshProgress } from './progress';
-import type { LessonProgress } from './progress';
+import type { LessonProgress, ProgressUpdate } from './progress';
 import usePlayback from './usePlayback';
 
 type Stage = 'watch' | 'card' | 'practice';
 
 function lessonStatus(id: LessonId, progress: LessonProgress) {
-  if (progress.completed) return '✓';
   if (progress.card) return '▱';
   return id === 2 ? '01' : '02';
 }
@@ -31,17 +30,17 @@ function frameStatus(index: number, step: number, viewed: readonly number[]) {
 
 export default function App() {
   const [selection, setSelection] = useState({ id: 2 as LessonId, revision: 0, card: false });
-  const [progress, setProgress] = useState<Record<LessonId, LessonProgress>>({
-    2: freshProgress(),
-    3: freshProgress(),
-  });
+  const [progress, setProgress] = useState<Record<LessonId, LessonProgress>>(() => ({
+    2: freshProgress(2),
+    3: freshProgress(3),
+  }));
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string } | null>(null);
   const lessonId = selection.id;
   const total = progress[2].solved + progress[3].solved;
 
-  const updateProgress = useCallback((id: LessonId, update: Partial<LessonProgress>) => {
-    setProgress((current) => ({ ...current, [id]: { ...current[id], ...update } }));
+  const updateProgress = useCallback((id: LessonId, update: ProgressUpdate) => {
+    setProgress((current) => ({ ...current, [id]: update(current[id]) }));
   }, []);
   const markViewed = useCallback((id: LessonId, step: number) => {
     setProgress((current) => (current[id].viewed.includes(step)
@@ -132,11 +131,8 @@ export default function App() {
               <span id="totalProgress">
                 {total}
                 {' '}
-                / 6 задач
+                задач
               </span>
-            </div>
-            <div className="progress-track">
-              <div id="overallProgress" style={{ width: `${(total / 6) * 100}%` }} />
             </div>
           </div>
         </aside>
@@ -145,11 +141,9 @@ export default function App() {
           lessonId={lessonId}
           initialCard={selection.card}
           progress={progress[lessonId]}
-          otherDone={progress[lessonId === 2 ? 3 : 2].completed}
           collectionOpen={collectionOpen}
           onProgress={updateProgress}
           onViewed={markViewed}
-          onOtherLesson={() => switchLesson(lessonId === 2 ? 3 : 2)}
           onToast={(message) => setToast({ message })}
         />
       </div>
@@ -175,11 +169,9 @@ interface LessonViewProps {
   lessonId: LessonId;
   initialCard: boolean;
   progress: LessonProgress;
-  otherDone: boolean;
   collectionOpen: boolean;
-  onProgress: (lessonId: LessonId, update: Partial<LessonProgress>) => void;
+  onProgress: (lessonId: LessonId, update: ProgressUpdate) => void;
   onViewed: (lessonId: LessonId, step: number) => void;
-  onOtherLesson: () => void;
   onToast: (message: string) => void;
 }
 
@@ -187,11 +179,9 @@ function LessonView({
   lessonId,
   initialCard,
   progress,
-  otherDone,
   collectionOpen,
   onProgress,
   onViewed,
-  onOtherLesson,
   onToast,
 }: LessonViewProps) {
   const [stage, setStage] = useState<Stage>(initialCard ? 'card' : 'watch');
@@ -205,7 +195,7 @@ function LessonView({
   function switchStage(next: Stage) {
     pause();
     if (next === 'card' && !progress.card) {
-      onProgress(lessonId, { card: true });
+      onProgress(lessonId, (current) => ({ ...current, card: true }));
       onToast('Шпаргалка добавлена в твою коллекцию.');
     }
     setStage(next);
@@ -285,10 +275,6 @@ function LessonView({
           <span>03</span>
           {' '}
           Решаю
-          {' '}
-          <span className="tab-lock" id="practiceLock">
-            {progress.completed ? '✓' : ''}
-          </span>
         </button>
       </nav>
       <section
@@ -404,14 +390,11 @@ function LessonView({
         <Practice
           lessonId={lessonId}
           progress={progress}
-          otherDone={otherDone}
           onProgress={(update) => onProgress(lessonId, update)}
           onReview={() => {
             goTo(0);
             switchStage('watch');
           }}
-          onCard={() => switchStage('card')}
-          onOtherLesson={onOtherLesson}
         />
       </section>
     </main>

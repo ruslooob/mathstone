@@ -223,21 +223,6 @@ h1 {
   letter-spacing: 0;
 }
 
-.progress-track {
-  height: 4px;
-  background: #e4e7dc;
-  border-radius: 5px;
-  margin-top: 12px;
-  overflow: hidden;
-}
-
-.progress-track > div {
-  height: 100%;
-  background: var(--green);
-  width: 0;
-  transition: width 0.3s;
-}
-
 main {
   padding: 30px 44px 20px;
   min-width: 0;
@@ -698,27 +683,6 @@ main {
   color: var(--green);
 }
 
-.task-dots {
-  display: flex;
-  gap: 7px;
-}
-
-.task-dot {
-  height: 7px;
-  width: 7px;
-  border-radius: 50%;
-  background: #dfe4d7;
-}
-
-.task-dot.done {
-  background: var(--green);
-}
-
-.task-dot.current {
-  background: #9cac79;
-  box-shadow: 0 0 0 3px #e7ecdf;
-}
-
 .practice-card {
   background: var(--paper);
   border: 1px solid var(--line);
@@ -848,69 +812,6 @@ main {
 
 .practice-hint .scheme-block svg {
   max-width: 165px;
-}
-
-.complete-card {
-  padding: 36px;
-  background: var(--paper);
-  border: 1px solid #d5ddcb;
-  border-radius: 18px;
-  text-align: center;
-}
-
-.complete-mark {
-  height: 62px;
-  width: 62px;
-  display: grid;
-  place-items: center;
-  background: var(--green-light);
-  color: var(--green);
-  border-radius: 50%;
-  font-size: 30px;
-  margin: auto auto 22px;
-}
-
-.complete-card h3 {
-  font-size: 28px;
-  letter-spacing: -1px;
-  font-weight: 500;
-  margin: 0 0 12px;
-}
-
-.complete-card > p {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.9;
-  margin: 0 auto 24px;
-  max-width: 400px;
-}
-
-.complete-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.complete-stats {
-  display: flex;
-  justify-content: center;
-  gap: 34px;
-  margin: 26px 0;
-}
-
-.complete-stats > div strong {
-  display: block;
-  font-size: 25px;
-  color: var(--green);
-  font-weight: 500;
-}
-
-.complete-stats > div span {
-  display: block;
-  font-size: 10px;
-  margin-top: 6px;
-  color: var(--muted);
 }
 
 dialog {
@@ -1499,22 +1400,6 @@ dialog::backdrop {
 
   .feedback {
     font-size: 11px;
-  }
-
-  .complete-card {
-    padding: 30px 20px;
-  }
-
-  .complete-card h3 {
-    font-size: 26px;
-  }
-
-  .complete-stats {
-    gap: 24px;
-  }
-
-  .complete-stats > div span {
-    font-size: 9px;
   }
 
   .collection-entry {

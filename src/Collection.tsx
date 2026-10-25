@@ -48,9 +48,7 @@ export default function Collection({
               <div>
                 <h3>{lessons[lessonId].name}</h3>
                 <p>
-                  {progress[lessonId].completed
-                    ? '✓ Освоено · 3 задачи решены'
-                    : `Шпаргалка получена · решено ${progress[lessonId].solved} из 3 задач`}
+                  {`Шпаргалка получена · решено задач: ${progress[lessonId].solved}`}
                 </p>
               </div>
               <button

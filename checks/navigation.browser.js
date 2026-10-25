@@ -57,35 +57,12 @@ export default async (page) => {
       (await page.locator('#feedbackText').innerText()).includes('Пока не сходится'),
       'Wrong answer must be checked',
     );
-    for (const answer of n === 2 ? ['5', '-2', '11'] : ['7', '8', '0']) {
-      await page.locator('#answerInput').fill(answer);
-      await page.locator('#answerForm button').click();
-      assert(await page.locator('#nextTask').isVisible(), 'Correct answer must allow proceeding');
-      await page.locator('#nextTask').click();
-    }
-    assert(
-      await page.locator('.complete-card').isVisible(),
-      'All three tasks must complete the lesson',
-    );
-    assert(
-      (await page.locator('#cardCount').innerText()) === '1 / 2',
-      'Completing practice must award the lesson card',
-    );
-    await page.locator('#viewEarnedCard').click();
-    assert(await page.locator('#cardPanel').isVisible(), 'Completed lesson card must open');
-    await page.locator('[data-stage="practice"]').click();
-    await page.locator('#repeatPractice').click();
-    assert(
-      await page.locator('#answerInput').isEnabled(),
-      'Repeat must open a new practice attempt',
-    );
     results.push({
       lesson: n,
       directPractice: true,
       directCard: true,
       collectWithoutWatching: true,
       returnAndCollection: true,
-      threeTasksAndRepeat: true,
     });
   }
   return results;

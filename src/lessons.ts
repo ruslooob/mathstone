@@ -11,7 +11,6 @@ interface Lesson {
   example: Matrix;
   positive: readonly (readonly number[])[];
   negative: readonly (readonly number[])[];
-  tasks: readonly Matrix[];
 }
 export interface Frame {
   kicker: string;
@@ -34,20 +33,6 @@ export const lessons: Record<LessonId, Lesson> = {
     ],
     positive: [[0, 3]],
     negative: [[1, 2]],
-    tasks: [
-      [
-        [2, 3],
-        [1, 4],
-      ],
-      [
-        [4, 2],
-        [3, 1],
-      ],
-      [
-        [2, -1],
-        [3, 4],
-      ],
-    ],
   },
   3: {
     title: ['Три тройки в плюс.', 'Три — в минус.'],
@@ -66,23 +51,6 @@ export const lessons: Record<LessonId, Lesson> = {
       [2, 4, 6],
       [0, 5, 7],
       [1, 3, 8],
-    ],
-    tasks: [
-      [
-        [1, 2, 0],
-        [0, 3, 1],
-        [2, 0, 1],
-      ],
-      [
-        [2, 0, 1],
-        [1, 3, 0],
-        [0, 2, 1],
-      ],
-      [
-        [1, 2, 3],
-        [2, 4, 6],
-        [0, 1, 1],
-      ],
     ],
   },
 };
