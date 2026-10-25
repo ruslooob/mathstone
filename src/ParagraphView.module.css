@@ -39,10 +39,6 @@
   white-space: nowrap;
 }
 
-.stageTabs button > span:first-child {
-  font-size: var(--font-caption);
-}
-
 .stageTabs button.active {
   color: var(--green);
   font-weight: 600;
@@ -56,11 +52,6 @@
   background: var(--green);
   left: 0;
   right: 0;
-}
-
-.tabLock {
-  font-size: var(--font-caption);
-  line-height: 1.5;
 }
 
 .explanationPanel {
@@ -145,13 +136,6 @@
   background: #fafbf6;
 }
 
-.frameCounter {
-  margin-left: auto;
-  font-size: var(--font-caption);
-  color: var(--muted);
-  white-space: nowrap;
-}
-
 .playButton {
   display: grid;
   place-items: center;
@@ -197,42 +181,6 @@
 
 .timeline button.current:after {
   background: var(--green);
-}
-
-.cheatSheetIntro {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 17px;
-}
-
-.cheatSheetIntro h3 {
-  font-size: var(--font-subheading);
-  letter-spacing: -0.02em;
-  margin: 0 0 6px;
-  font-weight: 500;
-}
-
-.earnedBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--font-caption);
-  letter-spacing: 0.05em;
-  color: var(--green);
-  padding: 8px 10px;
-  border-radius: 20px;
-  background: var(--green-light);
-  white-space: nowrap;
-}
-
-.cheatSheetActions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 15px;
-  margin-top: 22px;
 }
 
 @media (min-width: 1450px) {
@@ -308,10 +256,6 @@
     padding-bottom: 12px;
   }
 
-  .tabLock {
-    display: none;
-  }
-
   .visualStage {
     grid-template-columns: 1fr;
     gap: 0;
@@ -354,18 +298,5 @@
   .playButton {
     width: 32px;
     height: 32px;
-  }
-
-  .cheatSheetIntro {
-    align-items: flex-start;
-  }
-
-  .earnedBadge {
-    padding: 7px;
-  }
-
-  .cheatSheetActions {
-    flex-direction: column;
-    align-items: stretch;
   }
 }

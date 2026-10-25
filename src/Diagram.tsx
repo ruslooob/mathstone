@@ -7,11 +7,10 @@ interface Props {
   matrix: Matrix;
   paths?: readonly DiagramPath[];
   schematic?: boolean;
-  label?: boolean;
 }
 
 export default function Diagram({
-  matrix, paths = [], schematic = false, label = true,
+  matrix, paths = [], schematic = false,
 }: Props) {
   const matrixSize = matrix.length;
   const gap = matrixSize === 2 ? 105 : 82;
@@ -64,15 +63,7 @@ export default function Diagram({
         const activeClass = active
           ? styles[active.sign === 'positive' ? 'onPositive' : 'onNegative']
           : '';
-        return schematic ? (
-          <circle
-            key={`${x}-${y}`}
-            cx={x}
-            cy={y}
-            r="7"
-            className={`${styles.schematicNode}${active ? ` ${styles[active.sign]}` : ''}`}
-          />
-        ) : (
+        return (
           <Fragment key={`${x}-${y}`}>
             <circle
               className={`${styles.matrixNode} ${activeClass}`}
@@ -81,16 +72,18 @@ export default function Diagram({
               r="26"
             />
             <text className={styles.matrixNumber} x={x} y={y + 1}>
-              {numberText(flat[i])}
+              {schematic ? (
+                <>
+                  <tspan fontStyle="italic">x</tspan>
+                  <tspan baselineShift="sub" fontSize="0.6em">
+                    {`${Math.floor(i / matrixSize) + 1}${(i % matrixSize) + 1}`}
+                  </tspan>
+                </>
+              ) : numberText(flat[i])}
             </text>
           </Fragment>
         );
       })}
-      {label && !schematic && (
-        <text className={styles.matrixLabel} x="160" y="290">
-          {`МАТРИЦА A · ${matrixSize} × ${matrixSize}`}
-        </text>
-      )}
     </svg>
   );
 }

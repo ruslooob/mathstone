@@ -8,12 +8,14 @@ export default async (page) => {
   await page.goto('/');
   await page.clock.pauseAt(new Date('2026-01-01T00:01:00Z'));
   const results = [];
+  const currentFrame = async () => Number(await page
+    .locator('#timeline [aria-current="step"]').getAttribute('data-frame'));
   for (const n of [2, 3]) {
     await page.locator(`[data-paragraph="${n}"]`).click();
     await page.locator('#playButton').click();
-    const start = await page.locator('#frameCounter').innerText();
+    const start = await currentFrame();
     assert(
-      start.startsWith('02'),
+      start === 1,
       `${n}×${n}: Play must immediately start the first calculation, got ${start}`,
     );
     const motion = await page
@@ -24,33 +26,33 @@ export default async (page) => {
     assert(motion, `${n}×${n}: no actual diagram animation is running`);
     await page.clock.fastForward(1000);
     assert(
-      (await page.locator('#frameCounter').innerText()) === start,
+      (await currentFrame()) === start,
       'The frame must remain visible before its two-second duration ends',
     );
     await page.locator('#playButton').click();
-    const paused = await page.locator('#frameCounter').innerText();
+    const paused = await currentFrame();
     await page.clock.fastForward(10000);
     assert(
-      (await page.locator('#frameCounter').innerText()) === paused,
+      (await currentFrame()) === paused,
       'Pause must stop progression',
     );
     await page.locator('#playButton').click();
     await page.clock.fastForward(999);
     assert(
-      (await page.locator('#frameCounter').innerText()) === paused,
+      (await currentFrame()) === paused,
       'Resume must preserve the remaining frame duration',
     );
     await page.clock.fastForward(1);
     assert(
-      (await page.locator('#frameCounter').innerText()).startsWith('03'),
+      (await currentFrame()) === 2,
       'Playback must advance after exactly two seconds, excluding the pause',
     );
     const frameCount = n === 2 ? 4 : 8;
     for (let i = 3; i < frameCount; i += 1) {
       await page.clock.fastForward(2000);
-      const counter = await page.locator('#frameCounter').innerText();
+      const counter = await currentFrame();
       assert(
-        counter.startsWith(String(i + 1).padStart(2, '0')),
+        counter === i,
         `Playback did not advance: ${counter}`,
       );
     }

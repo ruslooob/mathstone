@@ -10,16 +10,16 @@ export default async (page) => {
     await page.locator('[data-stage="practice"]').click();
     assert(await page.locator('#practicePanel').isVisible(), 'Practice must be accessible');
     assert(await page.locator('#answerInput').isEnabled(), 'Answer field must be usable');
-    assert(await page.locator('#hintButton').isDisabled(), 'Unearned cheat sheet must stay closed');
+    assert(await page.locator('#hintButton').count() === 0, 'Unearned cheat sheet must stay hidden');
     assert(
-      await page.locator('[data-stage="cheatSheet"]').isDisabled(),
-      'Opening a paragraph must not award its cheat sheet',
+      await page.locator('[data-stage="cheatSheet"]').count() === 0,
+      'The cheat sheet tab must not reveal a future reward',
     );
     await page.locator('#inventoryButton').click();
     assert(await page.locator('#inventoryDialog').isVisible(), 'Inventory must be accessible');
     assert(
-      (await page.locator('#cheatSheetCount').innerText()) === '0 / 2',
-      'Opening the inventory must not award a cheat sheet',
+      (await page.locator('#inventoryContent').innerText()) === 'Пока здесь пусто.',
+      'The inventory must not reveal unearned cheat sheets',
     );
     await page.locator('#closeInventory').click();
     await page.locator('[data-stage="watch"]').click();

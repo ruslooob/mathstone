@@ -1,11 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import ui from './ui.module.css';
-import CheatSheet from './CheatSheet';
 import Diagram from './Diagram';
-import { determinant, numberText } from './paragraphs';
+import { determinant } from './paragraphs';
 import type { ParagraphId } from './paragraphs';
 import type { ParagraphProgress, ProgressUpdate } from './progress';
-import { hasCheatSheet, solutionsForCheatSheet } from './progress';
 import generateTask from './tasks';
 import styles from './Practice.module.css';
 
@@ -13,23 +11,21 @@ interface Props {
   paragraphId: ParagraphId;
   progress: ParagraphProgress;
   onProgress: (update: ProgressUpdate) => void;
-  onReview: () => void;
 }
 
 export default function Practice({
   paragraphId,
   progress,
   onProgress,
-  onReview,
 }: Props) {
-  const [hintOpen, setHintOpen] = useState(false);
-  const [input, setInput] = useState('');
+  const answer = determinant(progress.task.matrix);
+  const [input, setInput] = useState(() => (
+    progress.task.submittedAnswer ?? (progress.task.solved ? String(answer) : '')
+  ));
   const [feedback, setFeedback] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
   const answered = progress.task.solved;
-  const answer = determinant(progress.task.matrix);
-  const cheatSheetUnlocked = hasCheatSheet(progress);
 
   useLayoutEffect(() => {
     if (answered) actionRef.current?.focus({ preventScroll: true });
@@ -37,7 +33,6 @@ export default function Practice({
   }, [answered]);
 
   function resetAnswer() {
-    setHintOpen(false);
     setInput('');
     setFeedback('');
   }
@@ -55,7 +50,11 @@ export default function Practice({
       return;
     }
     onProgress((current) => (current.task === progress.task && !current.task.solved
-      ? { ...current, solved: current.solved + 1, task: { ...current.task, solved: true } }
+      ? {
+        ...current,
+        solved: current.solved + 1,
+        task: { ...current.task, solved: true, submittedAnswer: input },
+      }
       : current));
   }
 
@@ -78,21 +77,6 @@ export default function Practice({
       <div className={styles.practiceCard}>
         <div className={styles.taskHeader}>
           <h3>Найди определитель</h3>
-          <button
-            type="button"
-            className={`${ui.secondaryButton} ${styles.hintButton}`}
-            id="hintButton"
-            disabled={!cheatSheetUnlocked}
-            title={cheatSheetUnlocked
-              ? undefined
-              : `Откроется после ${solutionsForCheatSheet} верных решений этого параграфа.`}
-            aria-expanded={hintOpen}
-            onClick={() => {
-              setHintOpen(!hintOpen);
-            }}
-          >
-            {hintOpen ? 'Скрыть шпаргалку' : 'Показать шпаргалку'}
-          </button>
         </div>
         <div className={styles.taskBody}>
           <div className={styles.taskMatrix}>
@@ -119,7 +103,7 @@ export default function Practice({
                   aria-describedby="feedbackText"
                   placeholder="?"
                   disabled={answered}
-                  value={answered ? numberText(answer) : input}
+                  value={input}
                   onChange={(event) => setInput(event.target.value)}
                   aria-invalid={(!answered && Boolean(feedback)) || undefined}
                 />
@@ -140,19 +124,11 @@ export default function Practice({
                   role="status"
                   hidden={!answered && !feedback}
                 >
-                  <p id="feedbackText">{answered ? 'Верно' : feedback}</p>
+                  <p id="feedbackText">{answered ? 'Верно!' : feedback}</p>
                 </div>
               </div>
             </form>
           </div>
-        </div>
-      </div>
-      <div id="practiceHint" className={styles.practiceHint} hidden={!hintOpen}>
-        {cheatSheetUnlocked && <CheatSheet paragraphId={paragraphId} compact />}
-        <div className={styles.reviewActions}>
-          <button type="button" className={ui.secondaryButton} id="reviewExplanation" onClick={onReview}>
-            Посмотреть разбор ещё раз ↗
-          </button>
         </div>
       </div>
     </>
