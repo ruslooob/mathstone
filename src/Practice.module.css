@@ -1,0 +1,15 @@
+.actionButton {
+  min-height: 44px;
+}
+
+.answerFeedback {
+  display: flow-root;
+  min-height: 110px;
+  max-width: 210px;
+}
+
+@media (max-width: 580px) {
+  .answerFeedback {
+    max-width: none;
+  }
+}

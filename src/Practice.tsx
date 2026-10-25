@@ -5,6 +5,7 @@ import { determinant, numberText } from './lessons';
 import type { LessonId } from './lessons';
 import type { LessonProgress, ProgressUpdate } from './progress';
 import generateTask from './tasks';
+import styles from './Practice.module.css';
 
 interface Props {
   lessonId: LessonId;
@@ -120,14 +121,14 @@ export default function Practice({
               </div>
               <button
                 ref={actionRef}
-                className="primary-button"
+                className={`primary-button ${styles.actionButton}`}
                 type="submit"
                 id={answered ? 'nextTask' : undefined}
               >
                 {answered ? 'Следующая задача' : 'Проверить'}
                 {answered && <span aria-hidden="true">→</span>}
               </button>
-              <div className="answer-feedback">
+              <div className={styles.answerFeedback}>
                 <div
                   id="taskFeedback"
                   className={`feedback${!answered && feedback ? ' wrong' : ''}`}
