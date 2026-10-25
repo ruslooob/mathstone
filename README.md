@@ -62,7 +62,7 @@ npm run typecheck
 npm run build
 ```
 
-`lint` проверяет JavaScript, TypeScript, React и конфигурацию по правилам Airbnb, а форматирование CSS — через Prettier.
+`lint` проверяет JavaScript, TypeScript, React и конфигурацию по правилам Airbnb, а CSS — через Stylelint и Prettier.
 Предупреждения также останавливают проверку.
 `npm run lint:fix` исправляет нарушения ESLint и форматирует CSS.
 Правила проекта описаны в [CODING_STANDARDS.md](CODING_STANDARDS.md).

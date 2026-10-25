@@ -11,8 +11,9 @@
     "dev": "vite",
     "lint": "npm run lint:js && npm run lint:css",
     "lint:js": "eslint . --ext .js,.cjs,.mjs,.ts,.tsx --max-warnings 0",
-    "lint:css": "prettier --check \"src/**/*.css\"",
-    "lint:fix": "npm run lint:js -- --fix && prettier --write \"src/**/*.css\"",
+    "lint:css": "stylelint \"src/**/*.css\" && prettier --check \"src/**/*.css\"",
+    "lint:css:fix": "stylelint \"src/**/*.css\" --fix && prettier --write \"src/**/*.css\"",
+    "lint:fix": "npm run lint:js -- --fix && npm run lint:css:fix",
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "test:playback": "playwright test playback",
@@ -40,6 +41,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
     "prettier": "3.6.2",
+    "stylelint": "17.16.0",
     "typescript": "~6.0.3",
     "vite": "^8.3.5"
   }
