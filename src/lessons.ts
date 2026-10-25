@@ -8,7 +8,6 @@ export interface DiagramPath {
 interface Lesson {
   title: readonly [string, string];
   name: string;
-  description: readonly [string, string];
   example: Matrix;
   positive: readonly (readonly number[])[];
   negative: readonly (readonly number[])[];
@@ -29,7 +28,6 @@ export const lessons: Record<LessonId, Lesson> = {
   2: {
     title: ['Две диагонали.', 'Один ответ.'],
     name: 'Две диагонали',
-    description: ['Посмотри, как устроен приём.', 'Потом повторишь его сам.'],
     example: [
       [3, 2],
       [1, 4],
@@ -54,7 +52,6 @@ export const lessons: Record<LessonId, Lesson> = {
   3: {
     title: ['Три тройки в плюс.', 'Три — в минус.'],
     name: 'Правило треугольников',
-    description: ['Шесть произведений.', 'Одна наглядная схема.'],
     example: [
       [2, 1, 3],
       [1, 0, 2],
@@ -158,8 +155,8 @@ export function framesFor(lessonId: LessonId): Frame[] {
     title: lessonId === 2 ? 'Первое минус второе' : 'Складываем и вычитаем',
     text:
       lessonId === 2
-        ? 'Из произведения на зелёной диагонали вычти произведение на оранжевой. Получился определитель.'
-        : 'Сложи три зелёных произведения и вычти три оранжевых. Так работает правило треугольников для матрицы 3 × 3.',
+        ? 'Из произведения на зелёной диагонали вычти произведение на оранжевой.'
+        : 'Сложи три зелёных произведения и вычти три оранжевых.',
     paths: [],
     expression: `${lesson.positive.map((p) => factorText(productOf(flat, p))).join(' + ')} − ${lesson.negative.map((p) => factorText(productOf(flat, p))).join(' − ')} = `,
     result: determinant(lesson.example),

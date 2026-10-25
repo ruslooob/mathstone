@@ -65,21 +65,14 @@ export default function App() {
         <a
           className="brand"
           href="/"
-          aria-label="Вижу — решаю, на главную"
+          aria-label="Mathstone, на главную"
           onClick={(event) => {
             event.preventDefault();
             switchLesson(2);
           }}
         >
-          <span className="brand-mark" aria-hidden="true">
-            ↗
-          </span>
-          {' '}
-          вижу
-          <span className="brand-arrow">→</span>
-          решаю
+          Mathstone
         </a>
-        <span className="top-label">МАЛЕНЬКИЕ УРОКИ. НОВЫЕ УМЕНИЯ.</span>
         <button
           type="button"
           className="collection-trigger"
@@ -88,7 +81,7 @@ export default function App() {
         >
           <span aria-hidden="true">▱</span>
           {' '}
-          Мои карточки
+          Мои шпаргалки
           {' '}
           <span id="cardCount">
             {Number(progress[2].card) + Number(progress[3].card)}
@@ -106,13 +99,6 @@ export default function App() {
             матриц
             <span className="title-dot">.</span>
           </h1>
-          <p className="sidebar-description">
-            Увидеть приём.
-            <br />
-            Сохранить схему.
-            <br />
-            Попробовать самому.
-          </p>
           <nav className="lesson-list" aria-label="Уроки">
             {lessonIds.map((id) => (
               <button
@@ -152,19 +138,6 @@ export default function App() {
             <div className="progress-track">
               <div id="overallProgress" style={{ width: `${(total / 6) * 100}%` }} />
             </div>
-            <p>
-              Шпаргалка всегда под рукой.
-              <br />
-              Подсматривай столько, сколько нужно.
-            </p>
-          </div>
-          <div className="sidebar-bottom">
-            <span className="little-star">✳</span>
-            <span>
-              Один понятный шаг
-              <br />
-              за другим.
-            </span>
           </div>
         </aside>
         <LessonView
@@ -233,7 +206,7 @@ function LessonView({
     pause();
     if (next === 'card' && !progress.card) {
       onProgress(lessonId, { card: true });
-      onToast('Карточка добавлена в твою коллекцию.');
+      onToast('Шпаргалка добавлена в твою коллекцию.');
     }
     setStage(next);
   }
@@ -263,18 +236,6 @@ function LessonView({
 
   return (
     <main id="mainContent">
-      <div className="content-top">
-        <div className="breadcrumb">
-          МАТЕМАТИКА
-          {' '}
-          <span>/</span>
-          {' '}
-          <span id="lessonCrumb">
-            {`МАТРИЦЫ ${lessonId} × ${lessonId}`}
-          </span>
-        </div>
-        <span className="prototype-badge">ПЕРВАЯ ВЕРСИЯ</span>
-      </div>
       <div className="lesson-heading">
         <div>
           <div className="eyebrow" id="lessonIndex">
@@ -286,11 +247,6 @@ function LessonView({
             {lesson.title[1]}
           </h2>
         </div>
-        <p id="lessonDescription">
-          {lesson.description[0]}
-          <br />
-          {lesson.description[1]}
-        </p>
       </div>
       <nav className="stage-tabs" aria-label="Этапы урока">
         <button
@@ -313,7 +269,7 @@ function LessonView({
         >
           <span>02</span>
           {' '}
-          Забираю карточку
+          Забираю шпаргалку
           {' '}
           <span className="tab-lock" id="cardLock">
             {progress.card ? '✓' : ''}
@@ -343,11 +299,6 @@ function LessonView({
       >
         <div className="animation-card">
           <div className="canvas-head">
-            <span className="pill">
-              <span className="live-dot" />
-              {' '}
-              ВИЗУАЛЬНЫЙ РАЗБОР
-            </span>
             <div className="canvas-actions">
               <button
                 type="button"
@@ -408,37 +359,11 @@ function LessonView({
                 />
               ))}
             </div>
-            <span className="animation-hint">В твоём темпе</span>
-            <button
-              type="button"
-              id="previousStep"
-              className="icon-button"
-              aria-label="Предыдущий шаг"
-              disabled={step === 0}
-              onClick={() => goTo(step - 1)}
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              id="nextStep"
-              className="icon-button next-button"
-              aria-label="Следующий шаг"
-              disabled={step === frames.length - 1}
-              onClick={() => goTo(step + 1)}
-            >
-              →
-            </button>
           </div>
         </div>
         <div className="below-canvas">
-          <p>
-            <span aria-hidden="true">↳</span>
-            {' '}
-            Можно поставить на паузу и вернуться к любому шагу.
-          </p>
           <button type="button" id="collectCard" className="primary-button" onClick={() => switchStage('card')}>
-            {progress.card ? 'Открыть карточку' : 'Забрать карточку'}
+            {progress.card ? 'Открыть шпаргалку' : 'Забрать шпаргалку'}
             {' '}
             <span>↗</span>
           </button>
@@ -452,7 +377,7 @@ function LessonView({
       >
         <div className="card-intro">
           <div>
-            <h3>Весь приём — в одной карточке</h3>
+            <h3>Весь приём — в одной шпаргалке</h3>
             <p>Это схема из разбора. Она останется доступной в задачах.</p>
           </div>
           <span className="earned-badge">✓ В КОЛЛЕКЦИИ</span>
@@ -491,10 +416,6 @@ function LessonView({
           onOtherLesson={onOtherLesson}
         />
       </section>
-      <footer className="content-footer">
-        <span>ПОНЯТЬ → ПОПРОБОВАТЬ → УМЕТЬ</span>
-        <span>Можно решать на бумаге или в любом редакторе.</span>
-      </footer>
     </main>
   );
 }

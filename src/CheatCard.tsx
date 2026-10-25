@@ -12,7 +12,7 @@ export default function CheatCard({ lessonId }: { lessonId: LessonId }) {
     <article className="cheat-card">
       <div className="cheat-top">
         <span>
-          КАРТОЧКА 0
+          ШПАРГАЛКА 0
           {lessonId === 2 ? 1 : 2}
           {' '}
           / МАТЕМАТИКА

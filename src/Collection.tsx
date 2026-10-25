@@ -24,7 +24,7 @@ export default function Collection({
       <div className="dialog-top">
         <div>
           <div className="eyebrow">ТВОИ ПРИЁМЫ</div>
-          <h2>Коллекция карточек</h2>
+          <h2>Коллекция шпаргалок</h2>
         </div>
         <button
           type="button"
@@ -50,7 +50,7 @@ export default function Collection({
                 <p>
                   {progress[lessonId].completed
                     ? '✓ Освоено · 3 задачи решены'
-                    : `Карточка получена · решено ${progress[lessonId].solved} из 3 задач`}
+                    : `Шпаргалка получена · решено ${progress[lessonId].solved} из 3 задач`}
                 </p>
               </div>
               <button
@@ -70,7 +70,7 @@ export default function Collection({
           <div className="empty-collection">
             Здесь появятся твои шпаргалки.
             <br />
-            Посмотри первый разбор и забери карточку.
+            Посмотри первый разбор и забери шпаргалку.
           </div>
         )}
       </div>

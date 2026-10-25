@@ -4,7 +4,7 @@ import {
 import { framesFor } from './lessons';
 import type { LessonId } from './lessons';
 
-const FRAME_DURATION = 5000;
+const FRAME_DURATION = 2000;
 
 export default function usePlayback(lessonId: LessonId) {
   const frames = useMemo(() => framesFor(lessonId), [lessonId]);

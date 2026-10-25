@@ -63,17 +63,13 @@ export default function Practice({
     const answer = determinant(lesson.tasks[progress.solved]);
     if (Number(value) !== answer) {
       setFeedbackKind('wrong');
-      setFeedback(
-        'Пока не сходится. Проверь произведения и знаки перед ними. Можно открыть шпаргалку или повторить разбор.',
-      );
+      setFeedback('Пока не сходится');
       return;
     }
     setAnswered(true);
     setInput(numberText(answer));
     setFeedbackKind('correct');
-    setFeedback(
-      `Верно! Определитель равен ${numberText(answer)}. ${progress.hints.includes(progress.solved) ? 'Схема помогла, а вычисления ты сделал сам.' : 'Ты решил эту задачу без открытия шпаргалки.'}`,
-    );
+    setFeedback('Верно');
   }
 
   function nextTask() {
@@ -87,7 +83,7 @@ export default function Practice({
     return (
       <div className="complete-card">
         <div className="complete-mark">✓</div>
-        <div className="eyebrow">КАРТОЧКА ОСВОЕНА</div>
+        <div className="eyebrow">ШПАРГАЛКА ОСВОЕНА</div>
         <h3>
           {`${lessonId} × ${lessonId} — получилось!`}
         </h3>
@@ -123,7 +119,7 @@ export default function Practice({
             Пройти задачи ещё раз
           </button>
           <button type="button" className="secondary-button" id="viewEarnedCard" onClick={onCard}>
-            Открыть карточку
+            Открыть шпаргалку
           </button>
         </div>
       </div>
