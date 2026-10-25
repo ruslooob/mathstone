@@ -182,7 +182,7 @@ export default function Practice({
                   type="text"
                   inputMode="decimal"
                   autoComplete="off"
-                  aria-describedby="answerHelp feedbackText"
+                  aria-describedby="feedbackText"
                   placeholder="?"
                   disabled={answered}
                   value={input}
@@ -196,9 +196,6 @@ export default function Practice({
                 <span>→</span>
               </button>
             </form>
-            <p className="answer-help" id="answerHelp">
-              Решай на бумаге или в любом редакторе. Сюда введи полученное число.
-            </p>
           </div>
         </div>
         <div

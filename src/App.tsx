@@ -378,13 +378,11 @@ function LessonView({
         <div className="card-intro">
           <div>
             <h3>Весь приём — в одной шпаргалке</h3>
-            <p>Это схема из разбора. Она останется доступной в задачах.</p>
           </div>
           <span className="earned-badge">✓ В КОЛЛЕКЦИИ</span>
         </div>
         <CheatCard lessonId={lessonId} />
         <div className="card-actions">
-          <p>Приготовь бумагу или открой привычный редактор. Дальше попробуешь сам.</p>
           <button
             type="button"
             className="primary-button"

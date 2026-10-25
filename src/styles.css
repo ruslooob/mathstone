@@ -500,12 +500,6 @@ main {
   margin: 0 0 6px;
   font-weight: 500;
 }
-.card-intro p {
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.7;
-  margin: 0;
-}
 .earned-badge {
   display: inline-flex;
   align-items: center;
@@ -591,17 +585,10 @@ main {
 }
 .card-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 15px;
   margin-top: 22px;
-}
-.card-actions > p {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.8;
-  margin: 0;
-  max-width: 290px;
 }
 .practice-top {
   display: flex;
@@ -704,13 +691,6 @@ main {
   max-width: 210px;
   justify-content: center;
   padding: 12px;
-}
-.answer-help {
-  font-size: 10px;
-  color: var(--muted);
-  line-height: 1.8;
-  margin: 12px 0 0;
-  max-width: 225px;
 }
 .feedback {
   margin-top: 18px;
@@ -1233,11 +1213,6 @@ dialog::backdrop {
     flex-direction: column;
     align-items: stretch;
   }
-  .card-actions > p {
-    max-width: none;
-    text-align: center;
-    font-size: 10px;
-  }
   .task-header {
     align-items: flex-start;
     gap: 8px;
@@ -1279,10 +1254,6 @@ dialog::backdrop {
   .answer-area form .primary-button {
     width: 100%;
     max-width: none;
-  }
-  .answer-help {
-    max-width: none;
-    text-align: center;
   }
   .feedback {
     font-size: 11px;
