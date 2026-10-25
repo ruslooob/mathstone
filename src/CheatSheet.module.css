@@ -2,41 +2,23 @@
   background: var(--paper);
   border: 1px solid #d5ddcb;
   border-radius: 16px;
-  padding: 24px 28px;
-  position: relative;
-  overflow: hidden;
-}
-
-.cheatSheet:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 5px;
-  height: 100%;
-  background: #a5b48e;
-}
-
-.cheatTop {
-  display: flex;
-  justify-content: space-between;
-  color: var(--muted);
-  font-size: var(--font-caption);
-  letter-spacing: 0.05em;
+  padding: 28px;
 }
 
 .cheatSheet h3 {
   font-size: var(--font-subheading);
   font-weight: 500;
+  line-height: 1.4;
   letter-spacing: -0.02em;
-  margin: 12px 0 16px;
+  text-align: center;
+  margin: 0 0 18px;
 }
 
 .schemePair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  max-width: 520px;
+  gap: 20px;
+  max-width: 600px;
   margin: auto;
 }
 
@@ -46,7 +28,7 @@
 
 .schemeBlock svg {
   width: 100%;
-  max-width: 210px;
+  max-width: 270px;
   display: block;
   margin: auto;
 }
@@ -61,47 +43,41 @@
   color: var(--orange);
 }
 
-.schemeCaption {
-  font-size: var(--font-caption);
-  color: var(--muted);
-  margin-top: 0;
-}
-
-.cheatRule {
-  font-size: var(--font-body);
-  line-height: 1.5;
-  text-align: center;
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
   margin: 20px auto 0;
-  color: #67715f;
-  max-width: 470px;
+  font-family: "Cambria Math", Cambria, Georgia, serif;
+  font-size: 22px;
+  line-height: 1.8;
 }
 
-.cheatRule strong {
-  color: var(--ink);
-  font-weight: 500;
+.formula sub {
+  font-size: 0.65em;
 }
 
-.cheatSheet.compact {
-  background: #fbfcf6;
+.term {
+  white-space: nowrap;
 }
 
-.cheatSheet.compact h3 {
-  font-size: var(--font-subheading);
-}
-
-.compact .schemePair {
-  max-width: 390px;
-}
-
-.compact .schemeBlock svg {
-  max-width: 165px;
-}
 @media (max-width: 580px) {
   .cheatSheet {
-    padding: 19px 18px;
+    padding: 22px 12px;
+  }
+
+  .cheatSheet h3 {
+    font-size: 20px;
   }
 
   .schemePair {
-    gap: 6px;
+    gap: 4px;
+  }
+
+  .formula {
+    gap: 4px;
+    font-size: 19px;
   }
 }

@@ -4,10 +4,11 @@ import {
 import ui from './ui.module.css';
 import styles from './App.module.css';
 import Inventory from './Inventory';
+import type { InventoryView } from './Inventory';
 import ParagraphView from './ParagraphView';
 import { paragraphIds, paragraphs } from './paragraphs';
 import type { ParagraphId } from './paragraphs';
-import { freshProgress, hasCheatSheet } from './progress';
+import { hasCheatSheet, progressStorageKey, restoreProgress } from './progress';
 import type { ParagraphProgress, ProgressUpdate } from './progress';
 
 function paragraphStatus(id: ParagraphId, progress: ParagraphProgress) {
@@ -17,17 +18,20 @@ function paragraphStatus(id: ParagraphId, progress: ParagraphProgress) {
 
 export default function App() {
   const [selection, setSelection] = useState({
-    id: 2 as ParagraphId, revision: 0, showCheatSheet: false,
+    id: 2 as ParagraphId, revision: 0,
   });
-  const [progress, setProgress] = useState<Record<ParagraphId, ParagraphProgress>>(() => ({
-    2: freshProgress(2),
-    3: freshProgress(3),
-  }));
-  const [inventoryOpen, setInventoryOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string } | null>(null);
-  const announcedCheatSheets = useRef(new Set<ParagraphId>());
+  const [progress, setProgress] = useState(() => {
+    try {
+      return restoreProgress(localStorage.getItem(progressStorageKey));
+    } catch {
+      return restoreProgress(null);
+    }
+  });
+  const [inventory, setInventory] = useState<InventoryView | null>(null);
+  const announcedCheatSheets = useRef(new Set(
+    paragraphIds.filter((id) => hasCheatSheet(progress[id])),
+  ));
   const paragraphId = selection.id;
-  const total = progress[2].solved + progress[3].solved;
 
   const updateProgress = useCallback((id: ParagraphId, update: ProgressUpdate) => {
     setProgress((current) => ({ ...current, [id]: update(current[id]) }));
@@ -38,24 +42,26 @@ export default function App() {
       : { ...current, [id]: { ...current[id], viewed: [...current[id].viewed, step] } }));
   }, []);
 
-  function switchParagraph(id: ParagraphId, showCheatSheet = false) {
-    setSelection((current) => ({ id, revision: current.revision + 1, showCheatSheet }));
+  function switchParagraph(id: ParagraphId) {
+    setSelection((current) => ({ id, revision: current.revision + 1 }));
   }
 
   useEffect(() => {
     paragraphIds.forEach((id) => {
       if (hasCheatSheet(progress[id]) && !announcedCheatSheets.current.has(id)) {
         announcedCheatSheets.current.add(id);
-        setToast({ message: `Шпаргалка ${id} × ${id} добавлена в инвентарь.` });
+        setInventory({ page: 'reward', paragraphId: id });
       }
     });
   }, [progress]);
 
   useEffect(() => {
-    if (!toast) return undefined;
-    const timer = setTimeout(() => setToast(null), 3800);
-    return () => clearTimeout(timer);
-  }, [toast]);
+    try {
+      localStorage.setItem(progressStorageKey, JSON.stringify({ version: 1, progress }));
+    } catch {
+      // Practice remains available when the browser cannot save progress.
+    }
+  }, [progress]);
 
   return (
     <>
@@ -75,15 +81,9 @@ export default function App() {
           type="button"
           className={styles.inventoryTrigger}
           id="inventoryButton"
-          onClick={() => setInventoryOpen(true)}
+          onClick={() => setInventory({ page: 'list' })}
         >
           Мои шпаргалки
-          {' '}
-          <span id="cheatSheetCount">
-            {paragraphIds.filter((id) => hasCheatSheet(progress[id])).length}
-            {' '}
-            / 2
-          </span>
         </button>
       </header>
       <div className={styles.appLayout}>
@@ -93,7 +93,6 @@ export default function App() {
             Определители
             <br />
             матриц
-            <span className={styles.titleDot}>.</span>
           </h1>
           <nav className={styles.paragraphList} aria-label="Параграфы">
             {paragraphIds.map((id) => (
@@ -122,41 +121,23 @@ export default function App() {
               </button>
             ))}
           </nav>
-          <div className={styles.journey}>
-            <div className={styles.journeyTop}>
-              <span>ТВОЙ ПУТЬ</span>
-              <span id="totalProgress">
-                {total}
-                {' '}
-                задач
-              </span>
-            </div>
-          </div>
         </aside>
         <ParagraphView
           key={selection.revision}
           paragraphId={paragraphId}
-          initialCheatSheet={selection.showCheatSheet}
           progress={progress[paragraphId]}
-          inventoryOpen={inventoryOpen}
+          inventoryOpen={inventory !== null}
           onProgress={updateProgress}
           onViewed={markViewed}
         />
       </div>
       <Inventory
-        open={inventoryOpen}
+        view={inventory}
         progress={progress}
-        onClose={() => setInventoryOpen(false)}
-        onCheatSheet={(id) => switchParagraph(id, true)}
+        onClose={() => setInventory(null)}
+        onBack={() => setInventory({ page: 'list' })}
+        onCheatSheet={(id) => setInventory({ page: 'sheet', paragraphId: id })}
       />
-      <div
-        id="toast"
-        className={`${styles.toast}${toast ? ` ${styles.visible}` : ''}`}
-        role="status"
-        aria-live="polite"
-      >
-        {toast?.message}
-      </div>
     </>
   );
 }

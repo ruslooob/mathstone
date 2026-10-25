@@ -5,29 +5,29 @@ import type { ParagraphId, Sign } from './paragraphs';
 
 interface Props {
   paragraphId: ParagraphId;
-  compact?: boolean;
 }
 
-export default function CheatSheet({ paragraphId, compact = false }: Props) {
+export default function CheatSheet({ paragraphId }: Props) {
   const paragraph = paragraphs[paragraphId];
   const empty = Array.from({ length: paragraphId }, () => Array<number>(paragraphId).fill(0));
-  const captions = paragraphId === 2
-    ? { positive: 'Первое произведение', negative: 'Второе произведение вычитаем' }
-    : { positive: 'Три произведения складываем', negative: 'Три произведения вычитаем' };
+  const terms = (['positive', 'negative'] as const).flatMap((sign) => (
+    paragraph[sign].map((indexes) => ({ sign, indexes }))
+  ));
+  const notation = terms.map(({ sign, indexes }, termIndex) => {
+    const product = indexes.map((index) => (
+      `x${Math.floor(index / paragraphId) + 1}${(index % paragraphId) + 1}`
+    )).join(' · ');
+    const operator = sign === 'positive' ? ' + ' : ' − ';
+    return `${termIndex === 0 ? '' : operator}${product}`;
+  }).join('');
   return (
-    <article className={`${styles.cheatSheet}${compact ? ` ${styles.compact}` : ''}`}>
-      <div className={styles.cheatTop}>
-        <span>
-          ШПАРГАЛКА 0
-          {paragraphId === 2 ? 1 : 2}
-          {' '}
-          / МАТЕМАТИКА
-        </span>
-        <span>
-          {`${paragraphId} × ${paragraphId}`}
-        </span>
-      </div>
-      <h3>{paragraph.name}</h3>
+    <article
+      data-cheat-sheet={paragraphId}
+      className={styles.cheatSheet}
+    >
+      <h3 id="cheatSheetTitle" tabIndex={-1} data-dialog-heading>
+        {`Нахождение определителя матрицы ${paragraphId}×${paragraphId}`}
+      </h3>
       <div className={styles.schemePair}>
         {(['positive', 'negative'] as const).map((sign: Sign) => (
           <div className={styles.schemeBlock} key={sign}>
@@ -38,29 +38,29 @@ export default function CheatSheet({ paragraphId, compact = false }: Props) {
               matrix={empty}
               paths={paragraph[sign].map((indexes) => ({ indexes, sign }))}
               schematic
-              label={false}
             />
-            <p className={styles.schemeCaption}>
-              {captions[sign]}
-            </p>
           </div>
         ))}
       </div>
-      <p className={styles.cheatRule}>
-        {paragraphId === 2 ? (
-          <>
-            Перемножь числа вдоль каждой диагонали.
-            <br />
-            <strong>Из зелёного произведения вычти оранжевое.</strong>
-          </>
-        ) : (
-          <>
-            Каждая линия или треугольник — произведение трёх чисел.
-            <br />
-            <strong>Сумма зелёных произведений минус сумма оранжевых.</strong>
-          </>
-        )}
-      </p>
+      <div className={styles.formula} role="math" aria-label={`D = ${notation}`}>
+        <span>
+          <i>D</i>
+          {' '}
+          =
+        </span>
+        {terms.map(({ sign, indexes }, termIndex) => (
+          <span className={styles.term} key={`${sign}-${indexes.join('-')}`}>
+            {termIndex > 0 && <span>{sign === 'positive' ? ' + ' : ' − '}</span>}
+            {indexes.map((index, factorIndex) => (
+              <span key={index}>
+                {factorIndex > 0 && ' · '}
+                <i>x</i>
+                <sub>{`${Math.floor(index / paragraphId) + 1}${(index % paragraphId) + 1}`}</sub>
+              </span>
+            ))}
+          </span>
+        ))}
+      </div>
     </article>
   );
 }

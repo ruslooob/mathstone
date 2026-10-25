@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import ui from './ui.module.css';
 import styles from './ParagraphView.module.css';
-import CheatSheet from './CheatSheet';
 import Diagram from './Diagram';
 import Practice from './Practice';
 import { paragraphs, numberText } from './paragraphs';
 import type { ParagraphId } from './paragraphs';
 import type { ParagraphProgress, ProgressUpdate } from './progress';
-import { hasCheatSheet, solutionsForCheatSheet } from './progress';
 import usePlayback from './usePlayback';
 
-type Stage = 'watch' | 'cheatSheet' | 'practice';
+type Stage = 'watch' | 'practice';
 
 function frameStatus(index: number, step: number, viewed: readonly number[]) {
   if (index === step) return styles.current;
@@ -19,7 +17,6 @@ function frameStatus(index: number, step: number, viewed: readonly number[]) {
 
 interface ParagraphViewProps {
   paragraphId: ParagraphId;
-  initialCheatSheet: boolean;
   progress: ParagraphProgress;
   inventoryOpen: boolean;
   onProgress: (paragraphId: ParagraphId, update: ProgressUpdate) => void;
@@ -28,30 +25,30 @@ interface ParagraphViewProps {
 
 export default function ParagraphView({
   paragraphId,
-  initialCheatSheet,
   progress,
   inventoryOpen,
   onProgress,
   onViewed,
 }: ParagraphViewProps) {
-  const [stage, setStage] = useState<Stage>(initialCheatSheet ? 'cheatSheet' : 'watch');
+  const [stage, setStage] = useState<Stage>('watch');
   const playback = usePlayback(paragraphId);
   const {
     frames, step, playing, revision, diagramRef, goTo, toggle, pause,
   } = playback;
   const paragraph = paragraphs[paragraphId];
   const frame = frames[step];
-  const cheatSheetUnlocked = hasCheatSheet(progress);
 
   function switchStage(next: Stage) {
     pause();
-    if (next === 'cheatSheet' && !cheatSheetUnlocked) return;
     setStage(next);
   }
 
   useEffect(() => {
     onViewed(paragraphId, step);
   }, [paragraphId, step, onViewed]);
+  useEffect(() => {
+    if (inventoryOpen) pause();
+  }, [inventoryOpen, pause]);
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (
@@ -92,28 +89,7 @@ export default function ParagraphView({
           aria-current={stage === 'watch' ? 'step' : 'false'}
           onClick={() => switchStage('watch')}
         >
-          <span>01</span>
-          {' '}
-          Смотрю
-        </button>
-        <button
-          type="button"
-          data-stage="cheatSheet"
-          disabled={!cheatSheetUnlocked}
-          title={cheatSheetUnlocked
-            ? undefined
-            : `Откроется после ${solutionsForCheatSheet} верных решений этого параграфа.`}
-          className={stage === 'cheatSheet' ? styles.active : undefined}
-          aria-current={stage === 'cheatSheet' ? 'step' : 'false'}
-          onClick={() => switchStage('cheatSheet')}
-        >
-          <span>02</span>
-          {' '}
-          Шпаргалка
-          {' '}
-          <span className={styles.tabLock} id="cheatSheetLock">
-            {cheatSheetUnlocked ? '✓' : ''}
-          </span>
+          Объяснение
         </button>
         <button
           type="button"
@@ -122,9 +98,7 @@ export default function ParagraphView({
           aria-current={stage === 'practice' ? 'step' : 'false'}
           onClick={() => switchStage('practice')}
         >
-          <span>03</span>
-          {' '}
-          Решаю
+          Практика
         </button>
       </nav>
       <section
@@ -178,35 +152,7 @@ export default function ParagraphView({
                 />
               ))}
             </div>
-            <span className={styles.frameCounter} id="frameCounter">
-              {`${String(step + 1).padStart(2, '0')} / ${String(frames.length).padStart(2, '0')}`}
-            </span>
           </div>
-        </div>
-      </section>
-      <section
-        id="cheatSheetPanel"
-        aria-label="Шпаргалка"
-        hidden={stage !== 'cheatSheet' || !cheatSheetUnlocked}
-      >
-        <div className={styles.cheatSheetIntro}>
-          <div>
-            <h3>Весь приём — в одной шпаргалке</h3>
-          </div>
-          <span className={styles.earnedBadge}>✓ В ИНВЕНТАРЕ</span>
-        </div>
-        {cheatSheetUnlocked && <CheatSheet paragraphId={paragraphId} />}
-        <div className={styles.cheatSheetActions}>
-          <button
-            type="button"
-            className={ui.primaryButton}
-            id="startPractice"
-            onClick={() => switchStage('practice')}
-          >
-            Перейти к задачам
-            {' '}
-            <span>↗</span>
-          </button>
         </div>
       </section>
       <section
@@ -218,10 +164,6 @@ export default function ParagraphView({
           paragraphId={paragraphId}
           progress={progress}
           onProgress={(update) => onProgress(paragraphId, update)}
-          onReview={() => {
-            goTo(0);
-            switchStage('watch');
-          }}
         />
       </section>
     </main>
