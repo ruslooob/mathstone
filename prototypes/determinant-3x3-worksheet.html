@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тетрадь в клетку — определитель 3 × 3</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fffef7'/%3E%3Cpath d='M0 8h32M0 16h32M0 24h32M8 0v32M16 0v32M24 0v32' stroke='%2399b8d2' stroke-width='.6'/%3E%3Cpath d='M5 0v32' stroke='%23bf8584'/%3E%3C/svg%3E">
+  <style>
+    :root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif; background: #e8e5dc; color: #354152; --accent: #425a79; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1024px; padding: 28px 32px 32px; margin: auto; }
+    .notebook { background: #fffef7; border: 1px solid #d4d2c7; box-shadow: 2px 8px 25px #3a393318, -2px 1px 0 #f6f3ea; }
+    #page { display: block; width: 100%; height: auto; }
+    .controls { border-top: 1px solid #c5c9c2; margin-top: 24px; padding-top: 15px; }
+    .seek-row { display: flex; align-items: center; gap: 16px; }
+    input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); margin: 0; height: 24px; cursor: pointer; }
+    .time, .counter { font-size: 11px; color: #67706f; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .buttons { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+    .transport { display: flex; gap: 7px; }
+    .toolbar-options { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .speed { display: flex; align-items: center; gap: 9px; color: #626b6a; font-size: 12px; }
+    button, select { font: inherit; color: inherit; cursor: pointer; }
+    button:disabled { opacity: .3; cursor: default; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid #bdc5c2; border-radius: 4px; background: transparent; }
+    .button svg { width: 22px; height: 22px; }
+    .button svg[hidden] { display: none; }
+    .button:hover:not(:disabled) { background: #dce1dd; }
+    .button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    .button.primary:hover { background: #344b68; }
+    select { padding: 8px 9px; border: 1px solid #bdc5c2; border-radius: 4px; background: #fffef7; }
+    .steps { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 5px; margin-top: 21px; }
+    .step { min-width: 0; padding: 9px 3px 10px; background: transparent; border: 0; border-top: 2px solid #c3cac5; color: #69736e; }
+    .step span { display: block; font-size: 12px; }
+    .step small { display: block; font-size: 9px; white-space: nowrap; margin-top: 6px; }
+    .step[aria-current="step"] { background: #dde4e8; border-top-color: var(--accent); color: #344b68; }
+    @media (max-width: 650px) {
+      main { padding: 15px 12px 26px; }
+      .steps { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .seek-row { gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Автономная проба: клетчатая тетрадь, рукописные SVG-штрихи, карандашные треугольники. -->
+  <main>
+    <section class="notebook" aria-label="Решение в тетради в клетку">
+      <svg id="page" viewBox="0 0 960 744" role="img" aria-labelledby="page-title page-description"></svg>
+    </section>
+    <div class="controls">
+      <div class="seek-row"><input id="seek" type="range" min="0" step="1" value="0" aria-label="Время анимации"><span id="time" class="time"></span></div>
+      <div class="buttons">
+        <div class="transport">
+          <button id="previous" class="button" type="button" aria-label="Предыдущий шаг" title="Предыдущий шаг"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 5-7 7 7 7M5 12h14"/></svg></button>
+          <button id="play" class="button primary" type="button" aria-label="Пуск" title="Пуск">
+            <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.5a.5.5 0 0 1 .76-.43l10.5 6.5a.5.5 0 0 1 0 .86l-10.5 6.5A.5.5 0 0 1 8 18.5Z"/></svg>
+            <svg id="pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" hidden><rect x="6" y="5" width="4" height="14" rx=".7"/><rect x="14" y="5" width="4" height="14" rx=".7"/></svg>
+          </button>
+          <button id="next" class="button" type="button" aria-label="Следующий шаг" title="Следующий шаг"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 5 7 7-7 7M19 12H5"/></svg></button>
+          <button id="restart" class="button" type="button" aria-label="Сначала" title="Сначала"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 2.75 6.5M3 4v7h7"/></svg></button>
+        </div>
+        <div class="toolbar-options">
+          <label class="speed" for="speed">Скорость <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+          <span id="counter" class="counter" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+    <nav id="steps" class="steps" aria-label="Шаги вычисления"></nav>
+  </main>
+  <script>
+    // Каждый знак записан отдельными кривыми: анимация повторяет движение ручки.
+    const glyphs = {
+      '0': { width: 23, paths: ['M12 2C1 1-1 28 9 30C21 32 24 0 12 2'] },
+      '1': { width: 20, paths: ['M4 10L12 2L10 30'] },
+      '2': { width: 23, paths: ['M2 8C5 0 18 0 19 7C20 14 5 21 2 29C8 27 15 30 21 27'] },
+      '3': { width: 23, paths: ['M2 6C10-1 23 2 17 10C15 13 10 15 6 15C16 10 25 19 17 27C12 32 4 30 1 26'] },
+      '6': { width: 23, paths: ['M18 3C7-1-1 15 3 25C8 36 24 27 19 19C14 12 5 16 3 23'] },
+      '8': { width: 23, paths: ['M11 15C-1 11 2 1 12 2C23 3 20 12 11 15C-3 20 0 31 11 30C26 29 25 19 11 15'] },
+      '+': { width: 25, paths: ['M2 17Q12 16 23 16', 'M13 5Q12 17 12 28'] },
+      '−': { width: 25, paths: ['M2 17Q12 16 23 16'] },
+      '·': { width: 11, paths: ['M4 17L5 17.5'] },
+      '=': { width: 25, paths: ['M2 12Q12 11 23 12', 'M2 21Q13 20 23 21'] },
+      '?': { width: 23, paths: ['M2 7C6-1 21 0 20 8C19 14 10 14 10 22', 'M10 29L10.3 29.2'] },
+      'A': { width: 26, paths: ['M1 30Q10 10 16 1L24 30', 'M6 20L21 19'] },
+      'd': { width: 23, paths: ['M18 17C7 8-2 27 7 30C14 32 17 18 20 2L17 30'] },
+      'e': { width: 22, paths: ['M3 21Q13 21 18 15C9 6-3 27 7 30Q15 32 21 25'] },
+      't': { width: 20, paths: ['M13 4L9 25Q8 34 18 27', 'M2 13L20 12'] },
+      ' ': { width: 11, paths: [] },
+    };
+    const matrix = [[2, 1, 3], [1, 0, 2], [3, 2, 1]];
+    const flat = matrix.flat();
+    const triples = [
+      { indexes: [0, 4, 8], sign: 1 }, { indexes: [1, 5, 6], sign: 1 },
+      { indexes: [2, 3, 7], sign: 1 }, { indexes: [2, 4, 6], sign: -1 },
+      { indexes: [0, 5, 7], sign: -1 }, { indexes: [1, 3, 8], sign: -1 },
+    ].map((triple, index) => ({ ...triple,
+      factors: triple.indexes.map((node) => flat[node]),
+      product: triple.indexes.reduce((product, node) => product * flat[node], 1),
+      triangle: index % 3 !== 0,
+    }));
+    const answer = triples.reduce((sum, triple) => sum + triple.sign * triple.product, 0);
+    const terms = triples.map((triple, index) => `${index === 0 ? '' : triple.sign > 0 ? ' + ' : ' − '}${triple.factors.join('·')}`);
+    const intermediate = '= ' + triples.map((triple, index) => `${index === 0 ? '' : triple.sign > 0 ? ' + ' : ' − '}${triple.product}`).join('');
+    const answerText = ` = ${answer}`;
+    const steps = [
+      { kind: 'intro', duration: 2000, name: 'Задача', detail: 'det A = ?' },
+      ...triples.map((triple, index) => ({ kind: 'triple', triple: index, duration: 3800, name: `Записываем тройку ${index + 1}`, detail: terms[index].trim() })),
+      { kind: 'simplify', duration: 4400, name: 'Вычисляем произведения', detail: '= 0 + 6 + …' },
+      { kind: 'answer', duration: 2200, name: 'Ответ', detail: `= ${answer}` },
+    ];
+    let duration = 0;
+    steps.forEach((step) => { step.start = duration; duration += step.duration; });
+    const byId = (id) => document.getElementById(id);
+    const clamp = (value) => Math.max(0, Math.min(1, value));
+    const smooth = (value) => { const t = clamp(value); return t * t * (3 - 2 * t); };
+    const measure = (value) => [...value].reduce((width, char) => width + glyphs[char].width + 2, 0);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let position = 0;
+    let playing = false;
+    let playbackRate = 1;
+    let request = null;
+    let lastTimestamp = null;
+    let animationEnd = duration;
+    let selected = -1;
+    const stepButtons = [];
+    byId('seek').max = duration;
+    steps.forEach((step, index) => {
+      const button = document.createElement('button');
+      button.className = 'step'; button.type = 'button';
+      button.innerHTML = `<span>${index + 1}</span><small>${step.detail}</small>`;
+      button.setAttribute('aria-label', `Шаг ${index + 1}: ${step.name}`);
+      button.addEventListener('click', () => goToStep(index));
+      byId('steps').append(button); stepButtons.push(button);
+    });
+
+    function handwriting(value, x, baseline, scale, progress = 1, seed = 0, id = '') {
+      const chars = [...value];
+      const strokeCount = chars.reduce((count, char) => count + glyphs[char].paths.length, 0);
+      let strokeIndex = 0;
+      let cursor = x;
+      let body = '';
+      chars.forEach((char, index) => {
+        const glyph = glyphs[char];
+        const angle = Math.sin((seed + index) * 7.3) * 1.5;
+        const offset = Math.sin((seed + index) * 3.9) * .7;
+        const paths = glyph.paths.map((path) => {
+          const amount = clamp(progress * strokeCount - strokeIndex);
+          strokeIndex += 1;
+          return `<path d="${path}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - amount}" opacity="${amount > 0 ? .95 : 0}"/>`;
+        }).join('');
+        body += `<g transform="translate(${cursor} ${baseline - 30 * scale + offset}) scale(${scale}) rotate(${angle} 11 16)">${paths}</g>`;
+        cursor += (glyph.width + 2) * scale;
+      });
+      return `<g${id ? ` id="${id}"` : ''} data-writing="${value}" fill="none" stroke="#2e4569" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">${body}</g>`;
+    }
+
+    function currentStep() {
+      return Math.max(0, steps.findLastIndex((step) => position >= step.start));
+    }
+
+    function pencilPath(points, closed, progress) {
+      const vertices = closed ? [...points, points[0]] : points;
+      const path = vertices.map(([x, y], index) => {
+        if (index === 0) return `M${x} ${y}`;
+        const [px, py] = vertices[index - 1];
+        return `Q${(px + x) / 2 + (index % 2 ? 1.1 : -.8)} ${(py + y) / 2 - .7} ${x} ${y}`;
+      }).join(' ');
+      return `<g id="pencil-triangle" data-closed="${closed}" fill="none" stroke="#66645e" stroke-linecap="round" stroke-linejoin="round"><path d="${path}" stroke-width="1.45" opacity=".68" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - progress}"/><path d="${path}" transform="translate(.65 -.45)" stroke-width=".45" opacity=".4" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - progress}"/></g>`;
+    }
+
+    function drawPage(step, p) {
+      const narrow = innerWidth <= 650;
+      const width = narrow ? 480 : 960;
+      const height = narrow ? 744 : 720;
+      const left = narrow ? 72 : 120;
+      const right = width - (narrow ? 24 : 48);
+      const gap = narrow ? 72 : 96;
+      const origin = narrow ? [168, 144] : [360, 168];
+      const matrixScale = narrow ? 1.12 : 1.3;
+      const scale = narrow ? .85 : 1.04;
+      const firstBaseline = narrow ? 408 : 504;
+      const rowGap = 48;
+      const triple = triples[step.triple];
+      const coords = flat.map((_, index) => [origin[0] + index % 3 * gap, origin[1] + Math.floor(index / 3) * gap]);
+      const paper = `<defs><pattern id="squares" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#8eb6d1" stroke-width=".65" opacity=".5"/></pattern><filter id="paper-grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="${width}" height="${height}" fill="#fffef7"/><rect width="${width}" height="${height}" filter="url(#paper-grain)" opacity=".025"/><rect width="${width}" height="${height}" fill="url(#squares)"/><path d="M48 0V${height} M51 0V${height}" stroke="#c57c7c" stroke-width=".75" opacity=".62"/>`;
+      let body = handwriting('det A = ?', left, narrow ? 70 : 72, narrow ? 1.06 : 1.16, 1, 91, 'question');
+      const bracketLeft = origin[0] - gap * .53;
+      const bracketRight = origin[0] + gap * 2.53;
+      const top = origin[1] - gap * .5;
+      const bottom = origin[1] + gap * 2.5;
+      body += `<g fill="none" stroke="#2e4569" stroke-width="1.7" stroke-linecap="round"><path d="M${bracketLeft + 12} ${top} Q${bracketLeft + 3} ${top + 1} ${bracketLeft} ${top + 2} L${bracketLeft + 1} ${bottom} L${bracketLeft + 13} ${bottom - 1}"/><path d="M${bracketRight - 12} ${top + 1} L${bracketRight} ${top} Q${bracketRight - 1} ${(top + bottom) / 2} ${bracketRight + 1} ${bottom} L${bracketRight - 12} ${bottom + 1}"/></g>`;
+      body += handwriting('A =', narrow ? 60 : 204, origin[1] + gap + 15, narrow ? .94 : 1.1, 1, 57);
+      if (triple) {
+        const points = triple.indexes.map((node) => coords[node]);
+        body += pencilPath(points, triple.triangle, smooth(p / .28));
+      }
+      coords.forEach(([x, y], index) => {
+        body += handwriting(String(flat[index]), x - 12 * matrixScale, y + 15 * matrixScale, matrixScale, 1, index * 11 + 3);
+      });
+      let cursor = left;
+      let baseline = firstBaseline;
+      const count = step.kind === 'intro' ? 0 : step.kind === 'triple' ? step.triple + 1 : triples.length;
+      let writtenExpression = '';
+      terms.forEach((term, index) => {
+        let writtenTerm = term;
+        let termWidth = measure(writtenTerm) * scale;
+        if ((narrow && index === 3) || cursor + termWidth > right) {
+          cursor = left; baseline += rowGap;
+          writtenTerm = term.trimStart();
+          termWidth = measure(writtenTerm) * scale;
+        }
+        if (index < count) {
+          const writing = step.kind === 'triple' && index === step.triple ? clamp((p - .24) / .66) : 1;
+          body += handwriting(writtenTerm, cursor, baseline, scale, writing, index * 13 + 5, `term-${index}`);
+          if (writing >= 1) writtenExpression += term;
+        }
+        cursor += termWidth;
+      });
+      if (step.kind === 'simplify' || step.kind === 'answer') {
+        const finalScale = Math.min(scale, (right - left) / measure(intermediate + answerText));
+        const finalBaseline = baseline + rowGap * 1.5;
+        body += handwriting(intermediate, left, finalBaseline, finalScale,
+          step.kind === 'simplify' ? clamp((p - .05) / .9) : 1, 102, 'intermediate');
+        if (step.kind === 'answer') {
+          const answerX = left + measure(intermediate) * finalScale;
+          body += handwriting(answerText, answerX, finalBaseline, finalScale, clamp(p / .6), 117, 'answer');
+          const underline = smooth((p - .64) / .3);
+          const lineX = answerX + measure(' = ') * finalScale;
+          const lineEnd = answerX + measure(answerText) * finalScale;
+          body += `<g fill="none" stroke="#67645f" stroke-linecap="round"><path d="M${lineX} ${finalBaseline + 9}Q${(lineX + lineEnd) / 2} ${finalBaseline + 7} ${lineEnd} ${finalBaseline + 9}" stroke-width="1.2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - underline}"/><path d="M${lineX + 1} ${finalBaseline + 14}L${lineEnd - 1} ${finalBaseline + 13}" stroke-width=".8" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - underline}"/></g>`;
+        }
+      }
+      const finalDescription = step.kind === 'simplify' || step.kind === 'answer'
+        ? terms.join('') + ' ' + intermediate + (step.kind === 'answer' ? answerText : '')
+        : writtenExpression || 'det A = ?';
+      byId('page').setAttribute('viewBox', `0 0 ${width} ${height}`);
+      byId('page').innerHTML = `<title id="page-title">Определитель 3 на 3: решение в тетради</title><desc id="page-description">Матрица A: 2, 1, 3; 1, 0, 2; 3, 2, 1. ${finalDescription}</desc>${paper}${body}`;
+    }
+
+    function render() {
+      const index = currentStep();
+      const step = steps[index];
+      const progress = clamp((position - step.start) / step.duration);
+      drawPage(step, reducedMotion.matches ? 1 : progress);
+      byId('seek').value = position;
+      byId('seek').setAttribute('aria-valuetext', `Шаг ${index + 1} из ${steps.length}, ${step.name}`);
+      byId('time').textContent = `${(position / 1000).toFixed(1)} / ${(duration / 1000).toFixed(1)} с`;
+      byId('play-icon').toggleAttribute('hidden', playing);
+      byId('pause-icon').toggleAttribute('hidden', !playing);
+      byId('play').setAttribute('aria-label', playing ? 'Пауза' : 'Пуск');
+      byId('play').title = playing ? 'Пауза' : 'Пуск';
+      byId('play').setAttribute('aria-pressed', String(playing));
+      if (selected !== index) {
+        byId('counter').textContent = `Шаг ${index + 1} из ${steps.length}`;
+        byId('previous').disabled = index === 0;
+        byId('next').disabled = index === steps.length - 1;
+        stepButtons.forEach((button, buttonIndex) => {
+          if (buttonIndex === index) button.setAttribute('aria-current', 'step');
+          else button.removeAttribute('aria-current');
+        });
+        selected = index;
+      }
+    }
+
+    function stop() {
+      playing = false; lastTimestamp = null;
+      if (request !== null) cancelAnimationFrame(request);
+      request = null;
+    }
+    function tick(timestamp) {
+      if (!playing) return;
+      if (lastTimestamp !== null) position = Math.min(animationEnd, position + (timestamp - lastTimestamp) * playbackRate);
+      lastTimestamp = timestamp;
+      if (position >= animationEnd) stop();
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+    function toggle() {
+      if (playing) { stop(); render(); return; }
+      if (position >= duration - 1) position = 0;
+      animationEnd = duration; playing = true; lastTimestamp = null;
+      render(); request = requestAnimationFrame(tick);
+    }
+    function goToStep(index) {
+      stop();
+      const bounded = Math.max(0, Math.min(steps.length - 1, index));
+      const step = steps[bounded];
+      position = step.start; animationEnd = step.start + step.duration - 1;
+      playing = bounded !== 0;
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+    byId('play').addEventListener('click', toggle);
+    byId('speed').addEventListener('change', (event) => { playbackRate = Number(event.target.value); });
+    byId('previous').addEventListener('click', () => goToStep(currentStep() - 1));
+    byId('next').addEventListener('click', () => goToStep(currentStep() + 1));
+    byId('restart').addEventListener('click', () => { stop(); position = 0; render(); });
+    byId('seek').addEventListener('input', (event) => { stop(); position = Number(event.target.value); render(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && event.target.closest('input, button, textarea, select, [contenteditable]')) return;
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goToStep(currentStep() - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goToStep(currentStep() + 1); }
+      if (event.code === 'Space') { event.preventDefault(); toggle(); }
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { stop(); render(); } });
+    window.addEventListener('resize', render);
+    render();
+  </script>
+</body>
+</html>

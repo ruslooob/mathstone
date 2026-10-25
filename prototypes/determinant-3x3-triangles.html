@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тройки и треугольники — определитель 3 × 3</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0c10'/%3E%3Ctext x='16' y='24' text-anchor='middle' fill='%2358c4dd' font-size='25'%3EA%3C/text%3E%3C/svg%3E">
+  <style>
+    :root { color-scheme: dark; background: #0b0c10; color: #edf0f5; font-family: "Segoe UI", system-ui, sans-serif; --blue: #58c4dd; --muted: #8e98aa; --line: #262b35; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1240px; margin: 0 auto; padding: 20px 32px 30px; }
+    .scene { display: block; width: 100%; height: auto; overflow: visible; }
+    .scene text { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; text-anchor: middle; dominant-baseline: central; }
+    .controls { border-top: 1px solid var(--line); padding-top: 20px; }
+    .seek-row { display: flex; align-items: center; gap: 20px; }
+    input[type="range"] { flex: 1; min-width: 0; accent-color: var(--blue); cursor: pointer; margin: 0; height: 24px; }
+    .time, .counter { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .buttons { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+    .transport { display: flex; flex-wrap: wrap; gap: 8px; }
+    .toolbar-options { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .speed { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+    button, select { font: inherit; color: inherit; cursor: pointer; }
+    select { background: #0b0c10; border: 1px solid #343c49; border-radius: 7px; padding: 9px 10px; color: #edf0f5; }
+    button:disabled { cursor: default; opacity: .3; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+    .button { border: 1px solid #343c49; border-radius: 7px; background: transparent; padding: 10px 18px; font-size: 13px; }
+    .button:hover:not(:disabled) { background: #161d28; }
+    .button.primary { border-color: var(--blue); background: var(--blue); color: #0b0c10; min-width: 96px; }
+    .button.primary:hover { background: #8edbed; }
+    .steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-top: 25px; gap: 5px; }
+    .step { min-width: 0; padding: 9px 3px 11px; background: transparent; border: 0; border-top: 2px solid #2b3240; color: var(--muted); }
+    .step span { display: block; font-size: 12px; }
+    .step small { display: block; font-size: 9px; white-space: nowrap; margin-top: 7px; }
+    .step[aria-current="step"] { border-top-color: var(--blue); color: #e6faff; background: #111c25; }
+    @media (max-width: 700px) {
+      main { padding: 12px 16px 24px; }
+      .controls { padding-top: 14px; }
+      .seek-row { gap: 12px; }
+      .button { padding: 10px 13px; }
+      .button.primary { min-width: 82px; }
+      .steps { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 5px; margin-top: 20px; }
+      .step small { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Локальная проба №3: последовательное построение шести троек без вычислений. -->
+  <!-- Один автономный HTML-файл. Оформление вдохновлено учебными анимациями 3Blue1Brown. -->
+  <main>
+    <svg id="scene" class="scene" viewBox="0 0 1120 620" role="img" aria-labelledby="scene-title scene-description"></svg>
+    <div class="controls">
+      <div class="seek-row">
+        <input id="seek" type="range" min="0" step="1" value="0" aria-label="Время анимации">
+        <span id="time" class="time"></span>
+      </div>
+      <div class="buttons">
+        <div class="transport">
+          <button id="previous" class="button" type="button">Назад</button>
+          <button id="play" class="button primary" type="button">Пуск</button>
+          <button id="next" class="button" type="button">Далее</button>
+          <button id="restart" class="button" type="button">Сначала</button>
+        </div>
+        <div class="toolbar-options">
+          <label class="speed" for="speed">Скорость
+            <select id="speed">
+              <option value="0.25">0.25×</option>
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+              <option value="2">2×</option>
+            </select>
+          </label>
+          <span id="counter" class="counter" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+    <nav id="steps" class="steps" aria-label="Тройки элементов"></nav>
+  </main>
+  <script>
+    const matrix = [[2, 1, 3], [1, 0, 2], [3, 2, 1]];
+    const flat = matrix.flat();
+    const rowColors = ['#58c4dd', '#ffff8b', '#fc8eac'];
+    const positive = '#72d9c1';
+    const negative = '#ff996f';
+    const white = '#edf0f5';
+    const coords = flat.map((_, index) => [index % 3 * 86, Math.floor(index / 3) * 86]);
+    const steps = [
+      { indexes: [0, 4, 8], sign: 1 },
+      { indexes: [1, 5, 6], sign: 1 },
+      { indexes: [2, 3, 7], sign: 1 },
+      { indexes: [2, 4, 6], sign: -1 },
+      { indexes: [0, 5, 7], sign: -1 },
+      { indexes: [1, 3, 8], sign: -1 },
+    ].map((step, index) => {
+      const points = step.indexes.map((node) => coords[node]);
+      const triangle = index % 3 !== 0;
+      const vertices = triangle ? [...points, points[0]] : points;
+      const distances = [0];
+      vertices.slice(1).forEach((point, vertex) => {
+        distances.push(distances[vertex] + Math.hypot(point[0] - vertices[vertex][0], point[1] - vertices[vertex][1]));
+      });
+      const length = distances[distances.length - 1];
+      return { ...step, triangle,
+        vertexProgress: distances.slice(0, 3).map((distance) => distance / length),
+        path: points.map(([x, y], vertex) => `${vertex ? 'L' : 'M'} ${x} ${y}`).join(' ') + (triangle ? ' Z' : ''),
+        start: index * 3200, duration: 3200,
+      };
+    });
+    const duration = steps.length * 3200;
+    const byId = (id) => document.getElementById(id);
+    const clamp = (value) => Math.max(0, Math.min(1, value));
+    const smooth = (value) => { const t = clamp(value); return t * t * (3 - 2 * t); };
+    const mix = (from, to, amount) => from + (to - from) * amount;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let position = 0;
+    let playing = false;
+    let playbackRate = 1;
+    let lastTimestamp = null;
+    let request = null;
+    let animationEnd = duration;
+    let selected = -1;
+    const stepButtons = [];
+    byId('seek').max = duration;
+    steps.forEach((step, index) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'step';
+      button.innerHTML = `<span>${index + 1}</span><small>${step.sign > 0 ? '+' : '−'}</small>`;
+      button.setAttribute('aria-label', `Тройка ${index + 1}: ${step.triangle ? 'треугольник' : 'диагональ'}, ${step.sign > 0 ? 'прибавляем' : 'вычитаем'}`);
+      button.addEventListener('click', () => goToStep(index));
+      byId('steps').append(button); stepButtons.push(button);
+    });
+
+    function currentStep() {
+      return Math.max(0, steps.findLastIndex((step) => position >= step.start));
+    }
+
+    function text(value, x, y, { size = 44, color = white, opacity = 1 } = {}) {
+      return `<text x="${x}" y="${y}" font-size="${size}" fill="${color}" opacity="${opacity}">${value}</text>`;
+    }
+
+    function drawPath(step, opacity, progress, id) {
+      return `<path id="${id}" d="${step.path}" fill="none" stroke="${step.sign > 0 ? positive : negative}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - progress}" opacity="${opacity}"/>`;
+    }
+
+    function drawScene(index, progress) {
+      const narrow = innerWidth <= 700;
+      const width = narrow ? 640 : 1120;
+      const height = 620;
+      const scale = narrow ? 1.45 : 1.35;
+      const step = steps[index];
+      const previous = index > 0 ? steps[index - 1] : null;
+      const p = reducedMotion.matches ? 1 : progress;
+      const draw = smooth((p - .12) / .6);
+      const previousOpacity = previous ? 1 - smooth(p / .18) : 0;
+      const dim = index === 0 ? smooth(p / .18) : 1;
+      let body = `<path d="M-27 -40 H-40 V212 H-27 M199 -40 H212 V212 H199" fill="none" stroke="${white}" stroke-width="2" opacity=".8"/>`;
+      body += text('A =', -102, 86, { size: 38, opacity: .75 });
+      if (previousOpacity > 0) body += drawPath(previous, .7 * previousOpacity, 1, 'previous-path');
+      body += drawPath(step, .7, draw, 'triple-path');
+      coords.forEach(([x, y], nodeIndex) => {
+        const vertex = step.indexes.indexOf(nodeIndex);
+        const incoming = vertex < 0 ? 0 : vertex === 0
+          ? smooth((p - .02) / .13)
+          : smooth((draw - step.vertexProgress[vertex] + .08) / .08);
+        const outgoing = previous?.indexes.includes(nodeIndex) ? previousOpacity : 0;
+        const highlight = Math.max(incoming, outgoing);
+        const color = highlight > 0 ? rowColors[Math.floor(nodeIndex / 3)] : white;
+        if (highlight > 0) body += `<circle cx="${x}" cy="${y}" r="30" fill="#0b0c10" stroke="${color}" stroke-width="1.5" opacity="${highlight * .8}"/>`;
+        const opacity = mix(mix(1, .24, dim), 1, highlight);
+        body += text(flat[nodeIndex], x, y, { color, opacity });
+      });
+      const description = `Тройка ${index + 1} из ${steps.length}. ${step.triangle ? 'Треугольник' : 'Диагональ'}. ${step.sign > 0 ? 'Прибавляем' : 'Вычитаем'}. Элементы: ${step.indexes.map((node) => `строка ${Math.floor(node / 3) + 1}, столбец ${node % 3 + 1}`).join('; ')}.`;
+      byId('scene').setAttribute('viewBox', `0 0 ${width} ${height}`);
+      byId('scene').innerHTML = `<title id="scene-title">Тройки элементов определителя 3 на 3</title><desc id="scene-description">${description}</desc><g id="matrix" transform="translate(${width / 2 - 86 * scale} ${height / 2 - 86 * scale}) scale(${scale})">${body}</g>`;
+    }
+
+    function render() {
+      const index = currentStep();
+      const step = steps[index];
+      drawScene(index, clamp((position - step.start) / step.duration));
+      byId('seek').value = position;
+      byId('seek').setAttribute('aria-valuetext', `Тройка ${index + 1} из ${steps.length}`);
+      byId('time').textContent = `${(position / 1000).toFixed(1)} / ${(duration / 1000).toFixed(1)} с`;
+      byId('play').textContent = playing ? 'Пауза' : 'Пуск';
+      byId('play').setAttribute('aria-pressed', String(playing));
+      if (selected !== index) {
+        byId('counter').textContent = `Шаг ${index + 1} из ${steps.length}`;
+        byId('previous').disabled = index === 0;
+        byId('next').disabled = index === steps.length - 1;
+        stepButtons.forEach((button, buttonIndex) => {
+          if (buttonIndex === index) button.setAttribute('aria-current', 'step');
+          else button.removeAttribute('aria-current');
+        });
+        selected = index;
+      }
+    }
+
+    function stop() {
+      playing = false; lastTimestamp = null;
+      if (request !== null) cancelAnimationFrame(request);
+      request = null;
+    }
+
+    function tick(timestamp) {
+      if (!playing) return;
+      if (lastTimestamp !== null) position = Math.min(animationEnd, position + (timestamp - lastTimestamp) * playbackRate);
+      lastTimestamp = timestamp;
+      if (position >= animationEnd) stop();
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+
+    function toggle() {
+      if (playing) { stop(); render(); return; }
+      if (position >= duration - 1) position = 0;
+      animationEnd = duration; playing = true; lastTimestamp = null;
+      render(); request = requestAnimationFrame(tick);
+    }
+
+    function goToStep(index) {
+      stop();
+      const bounded = Math.max(0, Math.min(steps.length - 1, index));
+      const step = steps[bounded];
+      position = step.start; animationEnd = step.start + step.duration - 1;
+      playing = true;
+      render(); request = requestAnimationFrame(tick);
+    }
+
+    byId('play').addEventListener('click', toggle);
+    byId('speed').addEventListener('change', (event) => { playbackRate = Number(event.target.value); });
+    byId('previous').addEventListener('click', () => goToStep(currentStep() - 1));
+    byId('next').addEventListener('click', () => goToStep(currentStep() + 1));
+    byId('restart').addEventListener('click', () => { stop(); position = 0; render(); });
+    byId('seek').addEventListener('input', (event) => { stop(); position = Number(event.target.value); render(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && event.target.closest('input, button, textarea, select, [contenteditable]')) return;
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goToStep(currentStep() - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goToStep(currentStep() + 1); }
+      if (event.code === 'Space') { event.preventDefault(); toggle(); }
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { stop(); render(); } });
+    window.addEventListener('resize', render);
+    render();
+  </script>
+</body>
+</html>

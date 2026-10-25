@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Живая формула · светлая тема — определитель 3 × 3</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23faf9f5'/%3E%3Ctext x='16' y='24' text-anchor='middle' fill='%23087c9a' font-size='25'%3EA%3C/text%3E%3C/svg%3E">
+  <style>
+    :root { color-scheme: light; background: #faf9f5; color: #26333d; font-family: "Segoe UI", system-ui, sans-serif; --blue: #087c9a; --muted: #626d7a; --line: #d9dfe3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1240px; margin: 0 auto; padding: 20px 32px 30px; }
+    .scene { display: block; width: 100%; height: auto; overflow: visible; }
+    .scene text { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; text-anchor: middle; dominant-baseline: central; }
+    .scene .caption { font-family: "Segoe UI", system-ui, sans-serif; font-size: 13px; letter-spacing: 3px; }
+    .controls { border-top: 1px solid var(--line); padding-top: 20px; }
+    .seek-row { display: flex; align-items: center; gap: 20px; }
+    input[type="range"] { flex: 1; min-width: 0; accent-color: var(--blue); cursor: pointer; margin: 0; height: 24px; }
+    .time, .counter { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .buttons { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+    .transport { display: flex; flex-wrap: wrap; gap: 8px; }
+    .toolbar-options { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .speed { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+    button, select { font: inherit; color: inherit; cursor: pointer; }
+    select { background: #faf9f5; border: 1px solid #c3cdd4; border-radius: 7px; padding: 9px 10px; color: #26333d; }
+    button:disabled { cursor: default; opacity: .3; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+    .button { border: 1px solid #c3cdd4; border-radius: 7px; background: transparent; padding: 10px 18px; font-size: 13px; }
+    .button:hover:not(:disabled) { background: #eaf0f3; }
+    .button.primary { border-color: var(--blue); background: var(--blue); color: #ffffff; min-width: 96px; }
+    .button.primary:hover { background: #06657f; }
+    .steps { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); margin-top: 25px; gap: 5px; }
+    .step { min-width: 0; padding: 9px 3px 11px; background: transparent; border: 0; border-top: 2px solid #d5dde2; color: var(--muted); }
+    .step span { display: block; font-size: 12px; }
+    .step small { display: block; font-size: 9px; white-space: nowrap; margin-top: 7px; }
+    .step[aria-current="step"] { border-top-color: var(--blue); color: #075d75; background: #e5eff3; }
+    @media (max-width: 700px) {
+      main { padding: 12px 16px 24px; }
+      .controls { padding-top: 14px; }
+      .scene .caption { font-size: 21px; letter-spacing: 2px; }
+      .seek-row { gap: 12px; }
+      .button { padding: 10px 13px; }
+      .button.primary { min-width: 82px; }
+      .steps { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px 5px; margin-top: 20px; }
+      .step small { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Светлая версия локальной пробы №2: та же сцена, движения и управление. -->
+  <!-- Один автономный HTML-файл. Оформление вдохновлено учебными анимациями 3Blue1Brown. -->
+  <main>
+    <svg id="scene" class="scene" viewBox="0 0 1120 620" role="img" aria-labelledby="scene-title scene-description"></svg>
+    <div class="controls">
+      <div class="seek-row">
+        <input id="seek" type="range" min="0" step="1" value="0" aria-label="Время анимации">
+        <span id="time" class="time"></span>
+      </div>
+      <div class="buttons">
+        <div class="transport">
+          <button id="previous" class="button" type="button">Назад</button>
+          <button id="play" class="button primary" type="button">Пуск</button>
+          <button id="next" class="button" type="button">Далее</button>
+          <button id="restart" class="button" type="button">Сначала</button>
+        </div>
+        <div class="toolbar-options">
+          <label class="speed" for="speed">Скорость
+            <select id="speed">
+              <option value="0.25">0.25×</option>
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+              <option value="2">2×</option>
+            </select>
+          </label>
+          <span id="counter" class="counter" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+    <nav id="steps" class="steps" aria-label="Шаги вычисления"></nav>
+  </main>
+  <script>
+    const matrix = [[2, 1, 3], [1, 0, 2], [3, 2, 1]];
+    const flat = matrix.flat();
+    const triples = [
+      { indexes: [0, 4, 8], sign: 1 },
+      { indexes: [1, 5, 6], sign: 1 },
+      { indexes: [2, 3, 7], sign: 1 },
+      { indexes: [2, 4, 6], sign: -1 },
+      { indexes: [0, 5, 7], sign: -1 },
+      { indexes: [1, 3, 8], sign: -1 },
+    ].map((triple) => ({ ...triple,
+      factors: triple.indexes.map((index) => flat[index]),
+      product: triple.indexes.reduce((product, index) => product * flat[index], 1),
+    }));
+    const answer = triples.reduce((sum, triple) => sum + triple.sign * triple.product, 0);
+    const steps = [
+      { kind: 'intro', duration: 2300, name: 'Задача', detail: 'det A = ?' },
+      ...triples.flatMap((triple, index) => [
+        { kind: 'compute', triple: index, duration: 4400, name: `Тройка ${index + 1}`, detail: triple.factors.join(' · ') },
+        { kind: 'transfer', triple: index, duration: 2500, name: `Результат ${index + 1}`, detail: `${triple.sign > 0 ? '+' : '−'} ${triple.product}` },
+      ]),
+      { kind: 'final', duration: 3400, name: 'Ответ', detail: `det A = ${answer}` },
+    ];
+    let duration = 0;
+    steps.forEach((step) => { step.start = duration; duration += step.duration; });
+    const byId = (id) => document.getElementById(id);
+    const clamp = (value) => Math.max(0, Math.min(1, value));
+    const smooth = (value) => { const t = clamp(value); return t * t * (3 - 2 * t); };
+    const mix = (from, to, amount) => from + (to - from) * amount;
+    const numberText = (value) => String(value).replace('-', '−');
+    const rowColors = ['#087c9a', '#926900', '#b53968'];
+    const positive = '#08785f';
+    const negative = '#b44720';
+    const ink = '#26333d';
+    const gold = '#926900';
+    const coords = flat.map((_, index) => [index % 3 * 86, Math.floor(index / 3) * 86]);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let position = 0;
+    let playing = false;
+    let playbackRate = 1;
+    let lastTimestamp = null;
+    let request = null;
+    let animationEnd = duration;
+    let selected = -1;
+    const stepButtons = [];
+    byId('seek').max = duration;
+    steps.forEach((step, index) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'step';
+      button.innerHTML = `<span>${index + 1}</span><small>${step.detail}</small>`;
+      button.setAttribute('aria-label', `Шаг ${index + 1}: ${step.name}, ${step.detail}`);
+      button.addEventListener('click', () => goToStep(index));
+      byId('steps').append(button); stepButtons.push(button);
+    });
+
+    function text(value, x, y, { size = 44, color = ink, opacity = 1, id = '', extra = '' } = {}) {
+      return `<text${id ? ` id="${id}"` : ''} x="${x}" y="${y}" font-size="${size}" fill="${color}" opacity="${opacity}" ${extra}>${value}</text>`;
+    }
+
+    function flyingNumber(value, from, to, amount, color, size = 44, endSize = 44, id = '') {
+      const x = mix(from[0], to[0], amount);
+      const y = mix(from[1], to[1], amount) - Math.sin(Math.PI * amount) * 42;
+      return text(value, x, y, { color, size: mix(size, endSize, amount), id });
+    }
+
+    function resultPositions(count, width, withAnswer = false) {
+      const total = 34 + Math.max(0, count - 1) * 78 + (withAnswer ? 102 : 0);
+      const start = (width - total) / 2 + 17;
+      return Array.from({ length: count }, (_, index) => start + index * 78);
+    }
+
+    function currentStep() {
+      return Math.max(0, steps.findLastIndex((step) => position >= step.start));
+    }
+
+    function drawScene(step, progress) {
+      const narrow = window.innerWidth <= 700;
+      const width = narrow ? 640 : 1120;
+      const height = narrow ? 740 : 620;
+      const scene = byId('scene');
+      scene.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      const triple = triples[step.triple];
+      const color = triple?.sign < 0 ? negative : positive;
+      const p = reducedMotion.matches ? 1 : progress;
+      const firstMove = step.kind === 'compute' && step.triple === 0 ? smooth(p / .2) : 1;
+      const matrixOrigin = step.kind === 'intro' ? [width / 2 - 86, narrow ? 260 : 220]
+        : [mix(width / 2 - 86, narrow ? 232 : 220, firstMove), mix(narrow ? 260 : 220, narrow ? 120 : 155, firstMove)];
+      const factorX = narrow ? [130, 230, 330] : [620, 720, 820];
+      const equationY = narrow ? 430 : 245;
+      const productX = narrow ? 465 : 955;
+      const resultY = narrow ? 620 : 510;
+      const resultLabelY = resultY - 62;
+      let sceneBody = '';
+      let flights = '';
+      let resultState = '0';
+
+      if (step.kind === 'intro') {
+        sceneBody += text('det A = ?', width / 2, narrow ? 122 : 107, { size: 51, color: ink });
+      }
+
+      let matrixBody = `<path d="M-27 -40 H-40 V212 H-27 M199 -40 H212 V212 H199" fill="none" stroke="${ink}" stroke-width="2" opacity=".8"/>`;
+      matrixBody += text('A =', -102, 86, { size: 38, opacity: .75 });
+      if (triple) {
+        const points = triple.indexes.map((index) => coords[index]);
+        const triangle = step.triple % 3 !== 0;
+        const d = points.map(([x, y], index) => `${index ? 'L' : 'M'} ${x} ${y}`).join(' ') + (triangle ? ' Z' : '');
+        const line = step.kind === 'compute' ? smooth((p - .04) / .56) : 1;
+        matrixBody += `<path id="triple-path" d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - line}" opacity=".7"/>`;
+      }
+      coords.forEach(([x, y], index) => {
+        const active = triple?.indexes.includes(index);
+        const amount = triple ? (step.kind === 'compute' ? smooth(p / .18) : 1) : 0;
+        const nodeColor = active ? rowColors[Math.floor(index / 3)] : ink;
+        if (active) matrixBody += `<circle cx="${x}" cy="${y}" r="30" fill="#faf9f5" stroke="${nodeColor}" stroke-width="1.5" opacity="${amount * .8}"/>`;
+        matrixBody += text(flat[index], x, y, { color: nodeColor, opacity: active ? 1 : mix(1, .24, amount) });
+      });
+      sceneBody += `<g id="matrix" transform="translate(${matrixOrigin.join(' ')})">${matrixBody}</g>`;
+
+      if (triple) {
+        triple.factors.forEach((factor, index) => {
+          const travel = step.kind === 'compute' ? smooth((p - .14 - index * .14) / .25) : 1;
+          const node = coords[triple.indexes[index]];
+          if (travel > 0 && travel < 1) {
+            flights += flyingNumber(factor, [matrixOrigin[0] + node[0], matrixOrigin[1] + node[1]], [factorX[index], equationY], travel, rowColors[index], 44, 48, `factor-flight-${index}`);
+          }
+          sceneBody += text(factor, factorX[index], equationY, { size: 48, color: rowColors[index], opacity: travel >= 1 ? 1 : 0 });
+          if (index > 0) sceneBody += text('·', factorX[index] - 50, equationY, { size: 46, opacity: travel >= 1 ? .8 : 0 });
+        });
+        const computed = step.kind === 'compute' ? smooth((p - .76) / .14) : 1;
+        const transfer = step.kind === 'transfer' ? smooth((p - .14) / .62) : 0;
+        sceneBody += text('=', productX - 61, equationY, { size: 43, opacity: computed });
+        sceneBody += text(triple.product, productX, equationY, { size: 53, color: gold,
+          opacity: transfer > 0 && transfer < 1 ? 0 : computed, id: 'product' });
+      }
+
+      if (step.kind !== 'intro') {
+        const final = step.kind === 'final';
+        const transfer = step.kind === 'transfer';
+        const completed = final ? triples.length : step.triple;
+        const count = final ? triples.length : Math.max(1, completed + (transfer ? 1 : 0));
+        const previousCount = Math.max(1, completed);
+        const arrival = transfer ? smooth((p - .14) / .62) : 0;
+        const rearrange = final ? smooth(p / .3) : (transfer ? smooth(p / .3) : 1);
+        const previous = resultPositions(previousCount, width);
+        const target = resultPositions(count, width, final);
+        const finalOpacity = final ? smooth((p - .4) / .2) : 0;
+        sceneBody += text('Результат', width / 2, resultLabelY, { color: '#626d7a', extra: 'class="caption"' });
+        const recorded = triples.slice(0, completed);
+        resultState = recorded.map((item, index) => `${index === 0 ? '' : item.sign > 0 ? ' + ' : ' − '}${item.product}`).join('') || '0';
+        recorded.forEach((item, index) => {
+          const x = mix(previous[index], target[index], rearrange);
+          const termColor = item.sign > 0 ? positive : negative;
+          if (index > 0) sceneBody += text(item.sign > 0 ? '+' : '−', x - 37, resultY, { size: 36, color: termColor });
+          sceneBody += text(item.product, x, resultY, { size: 40, color: termColor });
+        });
+        if (!completed && (!transfer || arrival < 1)) sceneBody += text('0', target[0], resultY, { size: 40, color: '#737e89' });
+        if (transfer) {
+          const x = target[completed];
+          if (completed > 0) sceneBody += text(triple.sign > 0 ? '+' : '−', x - 37, resultY, { size: 36, color, opacity: smooth((p - .63) / .13) });
+          if (arrival > 0 && arrival < 1) flights += flyingNumber(triple.product, [productX, equationY], [x, resultY], arrival, color, 53, 40, 'result-flight');
+          sceneBody += text(triple.product, x, resultY, { size: 40, color, opacity: arrival >= 1 ? 1 : 0, id: 'pending-result' });
+          if (arrival >= 1) resultState += completed ? `${triple.sign > 0 ? ' + ' : ' − '}${triple.product}` : '';
+        }
+        if (final) {
+          const answerX = target[target.length - 1] + 83;
+          sceneBody += text('=', answerX - 29, resultY, { size: 36, opacity: finalOpacity });
+          sceneBody += text(numberText(answer), answerX + 21, resultY, { size: 48, color: gold, opacity: finalOpacity, id: 'answer' });
+          const heroX = narrow ? 320 : 785;
+          const heroY = narrow ? 430 : 245;
+          const heroOpacity = smooth((p - .65) / .23);
+          sceneBody += text('det A =', heroX - 29, heroY, { size: 51, opacity: heroOpacity });
+          sceneBody += text(numberText(answer), heroX + 99, heroY, { size: 65, color: gold, opacity: heroOpacity, id: 'final-value' });
+          sceneBody += `<path d="M${heroX + 75} ${heroY + 41} Q${heroX + 99} ${heroY + 47} ${heroX + 123} ${heroY + 41}" fill="none" stroke="${gold}" stroke-width="2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - smooth((p - .84) / .15)}" opacity="${heroOpacity}"/>`;
+          if (finalOpacity >= 1) resultState += ` = ${answer}`;
+        }
+      }
+      scene.innerHTML = `<title id="scene-title">Определитель матрицы A размером 3 на 3</title><desc id="scene-description">${step.kind === 'intro' ? 'det A = ?' : `Шаг ${currentStep() + 1}. ${triple ? `${triple.factors.join(' × ')} = ${triple.product}. ` : ''}Результат: ${resultState}.`}</desc>${sceneBody}<g aria-hidden="true">${flights}</g>`;
+    }
+
+    function render() {
+      const index = currentStep();
+      const step = steps[index];
+      drawScene(step, clamp((position - step.start) / step.duration));
+      byId('seek').value = position;
+      byId('seek').setAttribute('aria-valuetext', `Шаг ${index + 1} из ${steps.length}, ${step.name}`);
+      byId('time').textContent = `${(position / 1000).toFixed(1)} / ${(duration / 1000).toFixed(1)} с`;
+      byId('play').textContent = playing ? 'Пауза' : 'Пуск';
+      byId('play').setAttribute('aria-pressed', String(playing));
+      if (selected !== index) {
+        byId('counter').textContent = `Шаг ${index + 1} из ${steps.length}`;
+        byId('previous').disabled = index === 0;
+        byId('next').disabled = index === steps.length - 1;
+        stepButtons.forEach((button, buttonIndex) => {
+          if (buttonIndex === index) button.setAttribute('aria-current', 'step');
+          else button.removeAttribute('aria-current');
+        });
+        selected = index;
+      }
+    }
+
+    function stop() {
+      playing = false; lastTimestamp = null;
+      if (request !== null) cancelAnimationFrame(request);
+      request = null;
+    }
+
+    function tick(timestamp) {
+      if (!playing) return;
+      if (lastTimestamp !== null) position = Math.min(animationEnd, position + (timestamp - lastTimestamp) * playbackRate);
+      lastTimestamp = timestamp;
+      if (position >= animationEnd) stop();
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+
+    function toggle() {
+      if (playing) { stop(); render(); return; }
+      if (position >= duration - 1) position = 0;
+      animationEnd = duration; playing = true; lastTimestamp = null;
+      render(); request = requestAnimationFrame(tick);
+    }
+
+    function goToStep(index) {
+      stop();
+      const bounded = Math.max(0, Math.min(steps.length - 1, index));
+      const step = steps[bounded];
+      position = step.start; animationEnd = step.start + step.duration - 1;
+      playing = bounded !== 0;
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+
+    byId('play').addEventListener('click', toggle);
+    byId('speed').addEventListener('change', (event) => { playbackRate = Number(event.target.value); });
+    byId('previous').addEventListener('click', () => goToStep(currentStep() - 1));
+    byId('next').addEventListener('click', () => goToStep(currentStep() + 1));
+    byId('restart').addEventListener('click', () => { stop(); position = 0; render(); });
+    byId('seek').addEventListener('input', (event) => { stop(); position = Number(event.target.value); render(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && event.target.closest('input, button, textarea, select, [contenteditable]')) return;
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goToStep(currentStep() - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goToStep(currentStep() + 1); }
+      if (event.code === 'Space') { event.preventDefault(); toggle(); }
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { stop(); render(); } });
+    window.addEventListener('resize', render);
+    render();
+  </script>
+</body>
+</html>

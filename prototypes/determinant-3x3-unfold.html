@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Развёртка Саррюса — шесть диагоналей</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0c10'/%3E%3Ctext x='16' y='24' text-anchor='middle' fill='%2358c4dd' font-size='25'%3EA%3C/text%3E%3C/svg%3E">
+  <style>
+    :root { color-scheme: dark; background: #0b0c10; color: #edf0f5; font-family: "Segoe UI", system-ui, sans-serif; --blue: #58c4dd; --muted: #8e98aa; --line: #262b35; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1240px; margin: 0 auto; padding: 20px 32px 30px; }
+    .scene { display: block; width: 100%; height: auto; overflow: visible; }
+    .scene text { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; text-anchor: middle; dominant-baseline: central; }
+    .scene .caption { font-family: "Segoe UI", system-ui, sans-serif; font-size: 13px; letter-spacing: 3px; }
+    .controls { border-top: 1px solid var(--line); padding-top: 20px; }
+    .seek-row { display: flex; align-items: center; gap: 20px; }
+    input[type="range"] { flex: 1; min-width: 0; accent-color: var(--blue); cursor: pointer; margin: 0; height: 24px; }
+    .time, .counter { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .buttons { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+    .transport { display: flex; flex-wrap: wrap; gap: 8px; }
+    .toolbar-options { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .speed { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+    button, select { font: inherit; color: inherit; cursor: pointer; }
+    select { background: #0b0c10; border: 1px solid #343c49; border-radius: 7px; padding: 9px 10px; color: #edf0f5; }
+    button:disabled { cursor: default; opacity: .3; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid #343c49; border-radius: 7px; background: transparent; padding: 0; }
+    .button svg { width: 24px; height: 24px; }
+    .button svg[hidden] { display: none; }
+    .button:hover:not(:disabled) { background: #161d28; }
+    .button.primary { border-color: var(--blue); background: var(--blue); color: #0b0c10; }
+    .button.primary:hover { background: #8edbed; }
+    .steps { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); margin-top: 25px; gap: 5px; }
+    .step { min-width: 0; padding: 9px 3px 11px; background: transparent; border: 0; border-top: 2px solid #2b3240; color: var(--muted); }
+    .step span { display: block; font-size: 12px; }
+    .step small { display: block; font-size: 9px; white-space: nowrap; margin-top: 7px; }
+    .step[aria-current="step"] { border-top-color: var(--blue); color: #e6faff; background: #111c25; }
+    @media (max-width: 700px) {
+      main { padding: 12px 16px 24px; }
+      .controls { padding-top: 14px; }
+      .scene .caption { font-size: 21px; letter-spacing: 2px; }
+      .seek-row { gap: 12px; }
+      .steps { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 5px; margin-top: 20px; }
+      .step small { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Локальная проба №4: однократная развёртка и шесть прямых диагоналей. -->
+  <!-- Один автономный HTML-файл. Оформление вдохновлено учебными анимациями 3Blue1Brown. -->
+  <main>
+    <svg id="scene" class="scene" viewBox="0 0 1120 620" role="img" aria-labelledby="scene-title scene-description"></svg>
+    <div class="controls">
+      <div class="seek-row">
+        <input id="seek" type="range" min="0" step="1" value="0" aria-label="Время анимации">
+        <span id="time" class="time"></span>
+      </div>
+      <div class="buttons">
+        <div class="transport">
+          <button id="previous" class="button" type="button" aria-label="Предыдущий шаг" title="Предыдущий шаг">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 5-7 7 7 7M5 12h14"/></svg>
+          </button>
+          <button id="play" class="button primary" type="button" aria-label="Пуск" title="Пуск">
+            <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.5a.5.5 0 0 1 .76-.43l10.5 6.5a.5.5 0 0 1 0 .86l-10.5 6.5A.5.5 0 0 1 8 18.5Z"/></svg>
+            <svg id="pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" hidden><rect x="6" y="5" width="4" height="14" rx=".7"/><rect x="14" y="5" width="4" height="14" rx=".7"/></svg>
+          </button>
+          <button id="next" class="button" type="button" aria-label="Следующий шаг" title="Следующий шаг">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 5 7 7-7 7M19 12H5"/></svg>
+          </button>
+          <button id="restart" class="button" type="button" aria-label="Сначала" title="Сначала">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 2.75 6.5M3 4v7h7"/></svg>
+          </button>
+        </div>
+        <div class="toolbar-options">
+          <label class="speed" for="speed">Скорость
+            <select id="speed">
+              <option value="0.25">0.25×</option>
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+              <option value="2">2×</option>
+            </select>
+          </label>
+          <span id="counter" class="counter" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+    <nav id="steps" class="steps" aria-label="Шаги вычисления"></nav>
+  </main>
+  <script>
+const matrix = [[2, 1, 3], [1, 0, 2], [3, 2, 1]];
+    const rowColors = ['#58c4dd', '#ffff8b', '#fc8eac'];
+    const positive = '#72d9c1';
+    const negative = '#ff996f';
+    const ink = '#edf0f5';
+    const gold = '#ffff8b';
+    // Координаты на развёртке: [строка, столбец]. Столбцы 3 и 4 — копии 0 и 1.
+    const triples = [
+      { columns: [0, 1, 2], sign: 1 },
+      { columns: [1, 2, 3], sign: 1 },
+      { columns: [2, 3, 4], sign: 1 },
+      { columns: [2, 1, 0], sign: -1 },
+      { columns: [3, 2, 1], sign: -1 },
+      { columns: [4, 3, 2], sign: -1 },
+    ].map((triple) => {
+      const originalColumns = triple.columns.map((column) => column % 3);
+      const factors = originalColumns.map((column, row) => matrix[row][column]);
+      return { ...triple, factors,
+        product: factors.reduce((product, factor) => product * factor, 1),
+      };
+    });
+    const answer = triples.reduce((sum, triple) => sum + triple.sign * triple.product, 0);
+    const steps = [
+      { kind: 'intro', duration: 2200, name: 'Задача', detail: 'det A = ?' },
+      { kind: 'unfold', duration: 3200, name: 'Копии первых двух столбцов', detail: '1 2 3 · 1 2' },
+      ...triples.map((triple, index) => ({
+        kind: 'triple', triple: index, duration: 6500,
+        name: `Тройка ${index + 1}: диагональ`,
+        detail: `${triple.sign > 0 ? '+' : '−'} ${triple.factors.join(' · ')}`,
+      })),
+      { kind: 'final', duration: 3400, name: 'Ответ', detail: `det A = ${answer}` },
+    ];
+    let duration = 0;
+    steps.forEach((step) => { step.start = duration; duration += step.duration; });
+    const byId = (id) => document.getElementById(id);
+    const clamp = (value) => Math.max(0, Math.min(1, value));
+    const smooth = (value) => { const t = clamp(value); return t * t * (3 - 2 * t); };
+    const mix = (from, to, amount) => from + (to - from) * amount;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let position = 0;
+    let playing = false;
+    let playbackRate = 1;
+    let lastTimestamp = null;
+    let request = null;
+    let animationEnd = duration;
+    let selected = -1;
+    const stepButtons = [];
+    byId('seek').max = duration;
+    steps.forEach((step, index) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'step';
+      button.innerHTML = `<span>${index + 1}</span><small>${step.detail}</small>`;
+      button.setAttribute('aria-label', `Шаг ${index + 1}: ${step.name}`);
+      button.addEventListener('click', () => goToStep(index));
+      byId('steps').append(button); stepButtons.push(button);
+    });
+
+    function currentStep() {
+      return Math.max(0, steps.findLastIndex((step) => position >= step.start));
+    }
+
+    function text(value, x, y, { size = 44, color = ink, opacity = 1, id = '', extra = '' } = {}) {
+      return `<text${id ? ` id="${id}"` : ''} x="${x}" y="${y}" font-size="${size}" fill="${color}" opacity="${opacity}" ${extra}>${value}</text>`;
+    }
+
+    function resultPositions(count, width, withAnswer = false) {
+      const total = 34 + Math.max(0, count - 1) * 78 + (withAnswer ? 102 : 0);
+      return Array.from({ length: count }, (_, index) => (width - total) / 2 + 17 + index * 78);
+    }
+
+    function drawScene(step, progress) {
+      const narrow = innerWidth <= 700;
+      const width = narrow ? 640 : 1120;
+      const height = narrow ? 820 : 700;
+      const scale = narrow ? 1.05 : 1.15;
+      const scene = byId('scene');
+      scene.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      const p = reducedMotion.matches ? 1 : progress;
+      const triple = triples[step.triple];
+      const color = triple?.sign < 0 ? negative : positive;
+      let expansion = step.kind === 'intro' ? 0 : 1;
+      if (step.kind === 'unfold') expansion = smooth((p - .12) / .62);
+      const origin = [width / 2 - 86 * scale * (1 + expansion), narrow ? 200 : 180];
+      const trace = triple ? smooth((p - .18) / .2) : 0;
+      const formulaY = narrow ? 500 : 467;
+      const resultY = narrow ? 701 : 613;
+      const productX = width / 2 + 170;
+      const factorX = [width / 2 - 220, width / 2 - 120, width / 2 - 20];
+      const transfer = triple ? smooth((p - .87) / .1) : 0;
+      let body = '';
+      let overlay = '';
+      const markers = '<defs><marker id="copy-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10" fill="none" stroke="#58c4dd" stroke-width="1.5"/></marker></defs>';
+
+      if (step.kind === 'intro') body += text('det A = ?', width / 2, 72, { size: 51 });
+      if (step.kind === 'unfold') {
+        body += text('det A = ?', width / 2, 72, { size: 51, opacity: 1 - smooth(p / .2) });
+      }
+
+      let grid = `<path d="M-27 -40 H-40 V212 H-27 M199 -40 H212 V212 H199" fill="none" stroke="${ink}" stroke-width="2" opacity=".8"/>`;
+      grid += text('A =', -94, 86, { size: 36, opacity: .75 });
+      grid += `<g id="copies" opacity="${expansion}"><rect x="224" y="-40" width="152" height="252" rx="10" fill="#58c4dd" opacity=".035"/><path d="M220 -40V212" fill="none" stroke="#66768a" stroke-width="1" stroke-dasharray="3 7" opacity=".45"/></g>`;
+      if (step.kind === 'unfold' && expansion > 0 && expansion < 1) {
+        [0, 1].forEach((column) => {
+          const endX = (column + 3 * expansion) * 86;
+          const y = -60 - column * 24;
+          const opacity = Math.sin(Math.PI * expansion) * .7;
+          grid += `<path d="M${column * 86} ${y} Q${(column * 86 + endX) / 2} ${y - 55} ${endX} ${y}" fill="none" stroke="#58c4dd" stroke-width="1.5" opacity="${opacity}" marker-end="url(#copy-arrow)"/>`;
+        });
+      }
+
+      const active = triple ? smooth((p - .13) / .16) : 0;
+      matrix.forEach((row, rowIndex) => {
+        row.forEach((value, column) => {
+          grid += text(value, column * 86, rowIndex * 86, { opacity: mix(1, .22, active) });
+        });
+        [0, 1].forEach((column) => {
+          grid += text(row[column], (column + expansion * 3) * 86, rowIndex * 86, {
+            opacity: expansion * mix(.5, .22, active),
+            id: `copy-${rowIndex}-${column}`,
+          });
+        });
+      });
+
+      if (triple) {
+        const points = triple.columns.map((column, row) => [column * 86, row * 86]);
+        const path = points.map(([x, y], index) => `${index ? 'L' : 'M'} ${x} ${y}`).join(' ');
+        grid += `<path id="diagonal" d="${path}" fill="none" stroke="${color}" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - trace}" opacity=".85"/>`;
+        points.forEach(([x, y], row) => {
+          const visible = smooth((p - .16 - row * .055) / .09);
+          grid += `<g opacity="${visible}"><circle cx="${x}" cy="${y}" r="30" fill="#0b0c10" stroke="${rowColors[row]}" stroke-width="1.5"/>${text(triple.factors[row], x, y, { color: rowColors[row] })}</g>`;
+        });
+        triple.factors.forEach((factor, row) => {
+          const visible = smooth((p - .24 - row * .055) / .09);
+          body += text(factor, factorX[row], formulaY, { size: 48, color: rowColors[row], opacity: visible });
+          if (row > 0) body += text('·', factorX[row] - 50, formulaY, { size: 46, opacity: visible * .8 });
+        });
+        const computed = smooth((p - .44) / .09);
+        body += text('=', productX - 61, formulaY, { size: 43, opacity: computed });
+        body += text(triple.product, productX, formulaY, { size: 53, color: gold,
+          opacity: transfer > 0 && transfer < 1 ? 0 : computed, id: 'product' });
+      }
+      body = `<g id="matrix" transform="translate(${origin.join(' ')}) scale(${scale})">${grid}</g>` + body;
+
+      let expression = '';
+      if (triple || step.kind === 'final') {
+        const final = step.kind === 'final';
+        const completed = final ? triples.length : step.triple;
+        const count = final ? triples.length : completed + 1;
+        const previous = resultPositions(Math.max(1, completed), width);
+        const target = resultPositions(count, width, final);
+        const rearrange = final ? smooth(p / .3) : smooth((p - .84) / .12);
+        body += text('Результат', width / 2, resultY - 65, { size: 13, color: '#8e98aa', extra: 'class="caption"' });
+        const recorded = triples.slice(0, completed);
+        expression = recorded.map((item, index) => `${index === 0 ? '' : item.sign > 0 ? ' + ' : ' − '}${item.product}`).join('') || '0';
+        recorded.forEach((item, index) => {
+          const x = mix(previous[index], target[index], rearrange);
+          const termColor = item.sign > 0 ? positive : negative;
+          if (index > 0) body += text(item.sign > 0 ? '+' : '−', x - 37, resultY, { size: 36, color: termColor });
+          body += text(item.product, x, resultY, { size: 40, color: termColor });
+        });
+        if (triple) {
+          const x = target[completed];
+          if (completed === 0 && transfer < 1) body += text('0', x, resultY, { size: 40, color: '#657080' });
+          if (completed > 0) body += text(triple.sign > 0 ? '+' : '−', x - 37, resultY, { size: 36, color, opacity: smooth((p - .94) / .03) });
+          body += text(triple.product, x, resultY, { size: 40, color, opacity: transfer >= 1 ? 1 : 0, id: 'pending-result' });
+          if (transfer > 0 && transfer < 1) {
+            const flightX = mix(productX, x, transfer);
+            const flightY = mix(formulaY, resultY, transfer) - Math.sin(Math.PI * transfer) * 28;
+            overlay += text(triple.product, flightX, flightY, { size: mix(53, 40, transfer), color, id: 'result-flight' });
+          }
+          if (transfer >= 1 && completed > 0) expression += `${triple.sign > 0 ? ' + ' : ' − '}${triple.product}`;
+        }
+        if (final) {
+          const visible = smooth((p - .4) / .2);
+          const lastX = target[target.length - 1] + 83;
+          body += text('=', lastX - 29, resultY, { size: 36, opacity: visible });
+          body += text(answer, lastX + 21, resultY, { size: 48, color: gold, opacity: visible, id: 'answer' });
+          const hero = smooth((p - .65) / .23);
+          body += text('det A =', width / 2 - 29, formulaY, { size: 51, opacity: hero });
+          body += text(answer, width / 2 + 99, formulaY, { size: 65, color: gold, opacity: hero, id: 'final-value' });
+          if (visible >= 1) expression += ` = ${answer}`;
+        }
+      }
+      const description = step.kind === 'intro' ? 'det A = ?'
+        : step.kind === 'unfold' ? 'Справа повторяются первые два столбца матрицы. Матрица A остаётся размером 3 на 3.'
+          : triple ? `${triple.factors.join(' × ')} = ${triple.product}. Диагональ на развёртке. Результат: ${expression}.`
+            : `Результат: ${expression}.`;
+      scene.innerHTML = `<title id="scene-title">Развёртка Саррюса: шесть диагоналей</title><desc id="scene-description">${description}</desc>${markers}${body}<g aria-hidden="true">${overlay}</g>`;
+    }
+
+    function render() {
+      const index = currentStep();
+      const step = steps[index];
+      drawScene(step, clamp((position - step.start) / step.duration));
+      byId('seek').value = position;
+      byId('seek').setAttribute('aria-valuetext', `Шаг ${index + 1} из ${steps.length}, ${step.name}`);
+      byId('time').textContent = `${(position / 1000).toFixed(1)} / ${(duration / 1000).toFixed(1)} с`;
+      byId('play-icon').toggleAttribute('hidden', playing);
+      byId('pause-icon').toggleAttribute('hidden', !playing);
+      byId('play').setAttribute('aria-label', playing ? 'Пауза' : 'Пуск');
+      byId('play').title = playing ? 'Пауза' : 'Пуск';
+      byId('play').setAttribute('aria-pressed', String(playing));
+      if (selected !== index) {
+        byId('counter').textContent = `Шаг ${index + 1} из ${steps.length}`;
+        byId('previous').disabled = index === 0;
+        byId('next').disabled = index === steps.length - 1;
+        stepButtons.forEach((button, buttonIndex) => {
+          if (buttonIndex === index) button.setAttribute('aria-current', 'step');
+          else button.removeAttribute('aria-current');
+        });
+        selected = index;
+      }
+    }
+
+    function stop() {
+      playing = false; lastTimestamp = null;
+      if (request !== null) cancelAnimationFrame(request);
+      request = null;
+    }
+
+    function tick(timestamp) {
+      if (!playing) return;
+      if (lastTimestamp !== null) position = Math.min(animationEnd, position + (timestamp - lastTimestamp) * playbackRate);
+      lastTimestamp = timestamp;
+      if (position >= animationEnd) stop();
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+
+    function toggle() {
+      if (playing) { stop(); render(); return; }
+      if (position >= duration - 1) position = 0;
+      animationEnd = duration; playing = true; lastTimestamp = null;
+      render(); request = requestAnimationFrame(tick);
+    }
+
+    function goToStep(index) {
+      stop();
+      const bounded = Math.max(0, Math.min(steps.length - 1, index));
+      const step = steps[bounded];
+      position = step.start; animationEnd = step.start + step.duration - 1;
+      playing = bounded !== 0;
+      render();
+      if (playing) request = requestAnimationFrame(tick);
+    }
+
+    byId('play').addEventListener('click', toggle);
+    byId('speed').addEventListener('change', (event) => { playbackRate = Number(event.target.value); });
+    byId('previous').addEventListener('click', () => goToStep(currentStep() - 1));
+    byId('next').addEventListener('click', () => goToStep(currentStep() + 1));
+    byId('restart').addEventListener('click', () => { stop(); position = 0; render(); });
+    byId('seek').addEventListener('input', (event) => { stop(); position = Number(event.target.value); render(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && event.target.closest('input, button, textarea, select, [contenteditable]')) return;
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goToStep(currentStep() - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goToStep(currentStep() + 1); }
+      if (event.code === 'Space') { event.preventDefault(); toggle(); }
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { stop(); render(); } });
+    window.addEventListener('resize', render);
+    render();
+
+  </script>
+</body>
+</html>
