@@ -1,0 +1,143 @@
+.content {
+  min-height: 530px;
+}
+
+.content .equation {
+  margin: 20px 0;
+  font-family: "Cambria Math", Georgia, serif;
+  font-size: clamp(21px, 3vw, 29px);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.content .note {
+  padding-left: 14px;
+  border-left: 2px solid var(--teal);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.content .plot {
+  max-width: 600px;
+  font-size: 23px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.cards > div {
+  padding: 15px;
+  border: 1px solid var(--line);
+  background: #faf9f5;
+}
+
+.cards span,
+.cards strong {
+  display: block;
+}
+
+.cards span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cards strong {
+  margin-top: 8px;
+  font-family: "Cambria Math", Georgia, serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.proof {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.proofRow,
+.activeProof {
+  padding: 8px 14px;
+  border-left: 3px solid var(--line);
+  background: #faf9f5;
+}
+
+.activeProof {
+  border-color: var(--teal);
+  background: #e9f1ed;
+}
+
+.proof p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.proof .equation {
+  margin: 4px 0;
+  font-size: clamp(20px, 2.6vw, 26px);
+}
+
+.table {
+  width: 100%;
+  margin: 18px 0;
+  border-collapse: collapse;
+  background: #faf9f5;
+  font-variant-numeric: tabular-nums;
+}
+
+.table caption {
+  margin-bottom: 10px;
+  color: var(--muted);
+  text-align: left;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+
+.counted {
+  background: #e9f1ed;
+}
+
+.summary {
+  display: grid;
+  gap: 14px;
+  padding-left: 22px;
+}
+
+.source {
+  color: var(--ink);
+  font-size: 13px;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .content {
+    min-height: 450px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    font-size: 13px;
+  }
+
+  .table th,
+  .table td {
+    padding: 7px 5px;
+  }
+}
